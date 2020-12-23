@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Booking;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Gate;
@@ -19,9 +20,9 @@ class BookingController extends Controller
         $bookings = Booking::all();
         if(Gate::denies('admin')) {
             $bookings = $bookings->where('userid', Auth::id());
-            return view('bookings.index', array('bookings'=>$bookings));
+            return view('bookings.upcomingBookings', array('bookings'=>$bookings));
         }
-        return view('bookings.adminindex', array('bookings'=>$bookings));
+        return view('bookings.upcomingBookings', array('bookings'=>$bookings));
     }
 
     /**
@@ -32,7 +33,7 @@ class BookingController extends Controller
     public function create()
     {
         //
-        return view('bookings.create');
+        return view('bookings.createBooking');
     }
 
     /**
@@ -46,8 +47,7 @@ class BookingController extends Controller
         //
         // form validation
         $booking = $this->validate(request(), [
-        'start_time' => 'required|date_format:H:i',
-        'end_time' => 'required|date_format:H:i',
+        'booking_length' => 'required|string',
         'hiddenDay' => 'required|string',
         'hiddenMonth' => 'required|string',
         'hiddenYear' => 'required|string'
@@ -56,8 +56,10 @@ class BookingController extends Controller
         $booking = new Booking;
         $booking->userid = Auth::id();
         $booking->name = Auth::user()->name;
-        $booking->start_time = $request->input('start_time');
-        $booking->end_time = $request->input('end_time');
+        $booking_length = "+".$request->input('booking_length')." minutes";
+        $club_start_time = '15:30:00';
+        $booking->start_time = $club_start_time;
+        $booking->end_time = date("H:i:s", strtotime($booking_length, strtotime($club_start_time)));
         $day = $request->input('hiddenDay');
         $month = $request->input('hiddenMonth');
         $year = $request->input('hiddenYear');
@@ -71,6 +73,13 @@ class BookingController extends Controller
         $booking->booking_date = $newformat;
         // save the Booking object
         $booking->save();
+
+        $activity = new ActivityLog;
+        $activity->action = "Created a booking";
+        $activity->booking_id = $booking->id;
+        $activity->userid = Auth::id();
+        $activity->user = Auth::user()->name;
+        $activity->save();
         // generate a redirect HTTP response with a success message
         return back()->with('success', 'Booking has been added');
     }
@@ -85,7 +94,7 @@ class BookingController extends Controller
     {
         //
         $booking = Booking::find($id);
-        return view('bookings.show',compact('booking'));
+        return view('bookings.showBooking',compact('booking'));
     }
 
     /**
@@ -98,7 +107,7 @@ class BookingController extends Controller
     {
         //
         $booking = Booking::find($id);
-        return view('bookings.edit',compact('booking'));
+        return view('bookings.editBooking',compact('booking'));
     }
 
     /**
@@ -121,6 +130,13 @@ class BookingController extends Controller
         $booking->start_time = $request->input('start_time');
         $booking->end_time = $request->input('end_time');
         $booking->save();
+        
+        $activity = new ActivityLog;
+        $activity->booking_id = $id;
+        $activity->action = "Updated a booking";
+        $activity->userid = Auth::id();
+        $activity->user = Auth::user()->name;
+        $activity->save();
         return redirect('bookings')->with('success','Booking has been updated');
     }
 
@@ -136,6 +152,12 @@ class BookingController extends Controller
 
             $booking = Booking::find($id);
             $booking->delete();
+            $activity = new ActivityLog;
+            $activity->action = "Deleted a booking";
+            $activity->booking_id = $id;
+            $activity->userid = Auth::id();
+            $activity->user = Auth::user()->name;
+            $activity->save();
             return redirect('bookings')->with('success','Booking has been deleted');
         
     }

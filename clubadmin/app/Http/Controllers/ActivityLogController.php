@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\ActivityLog;
 
 use Illuminate\Http\Request;
 use Gate;
 
-class HomeController extends Controller
+class ActivityLogController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -24,9 +25,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if(Gate::denies('admin')) {
-            return view('parents/parentHome');
-        }
-        return view('admin/adminHome');
+        $activities = ActivityLog::all();
+        return view('admin/activityLog', array('activities'=>$activities));
     }
+
+    
 }

@@ -19,6 +19,8 @@ Route::get('/', function () {
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/activity-log', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-log');
+Route::get('/past-bookings', [App\Http\Controllers\PastBookingsController::class, 'index'])->name('past-bookings');
 
 Route::resource('bookings', App\Http\Controllers\BookingController::class);
 //Route::post('/create', [App\Http\Controllers\BookingController::class,'store']);
