@@ -12,11 +12,6 @@
   padding: 16px;
   text-decoration: none;
 }
-  
-.sidebar a.active {
-  background-color: rgb(132,0,255);
-  color: white;
-}
 
 .sidebar a:hover:not(.active) {
   background-color: #555;
@@ -64,6 +59,3 @@ th:nth-of-type(7), td:nth-of-type(7) {
   color: red;
 }
 
-.today {
-  background-color: rgb(230, 239, 247);
-}
