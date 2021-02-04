@@ -24,9 +24,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if(Gate::denies('admin')) {
-            return view('parents/parentHome');
-        }
-        return view('admin/adminHome');
+        return view('home');
     }
 }

@@ -26,7 +26,7 @@ class ActivityLogController extends Controller
     public function index()
     {
         $activities = ActivityLog::all();
-        return view('admin/activityLog', array('activities'=>$activities));
+        return view('admin.activityLog', array('activities'=>$activities));
     }
 
     
