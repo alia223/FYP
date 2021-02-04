@@ -20,9 +20,12 @@ class CreateBookingsTable extends Migration
             $table->date('booking_date');
             $table->time('start_time');
             $table->time('end_time');
+            $table->string('duration');
+            $table->bigInteger('roomid')->unsigned();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('userid')->references('id')->on('users'); 
+            $table->foreign('roomid')->references('id')->on('rooms'); 
         });
     }
 
