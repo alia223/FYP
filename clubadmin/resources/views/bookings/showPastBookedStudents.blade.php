@@ -7,15 +7,15 @@
                 <a href="{{ route('home') }}">Home</a>
                 @if(Auth::check())
                     @if (!Gate::denies('admin') && Gate::denies('clubstaff'))
-                    <a class="active" href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
+                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
+                        <a class="active" href="{{ route('past-bookings') }}">View Past Bookings</a>
                         <a href="{{ route('club-rooms') }}">Rooms</a>
                         <a href="{{ route('activity-log') }}">Activity Log</a>
                         <a href="{{ route('control-panel') }}">Control Panel</a>
                     @elseif (Gate::denies('admin') && Gate::denies('clubstaff'))
                         <a href="{{ route('create-bookings') }}?ym=<?php $date = date('Y-m'); echo $date?>">Create a Booking</a>
-                        <a class="active" href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
+                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
+                        <a class="active"  href="{{ route('past-bookings') }}">View Past Bookings</a>
                         <a href="{{ route('club-students') }}">Children</a>
                     @elseif (Gate::denies('admin') && !Gate::denies('clubstaff'))
                         <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
@@ -49,7 +49,7 @@
                                 <td class="text-center">{{$child['date_of_birth']}}</td>
                                 <td class="text-center">{{$child['dietary_requirements']}}</td>
                                 <td class="text-center">{{$child['food_arrangement']}}</td>
-                                <td class="text-center"><a href="{{action('App\Http\Controllers\BookedStudentController@edit', $child['id'])}}" class="btn
+                                <td class="text-center"><a href="{{action('App\Http\Controllers\PastBookingsController@edit', $child['id'])}}" class="btn
                                 btn-warning">Edit</a></td>
                             </tr>
                             @endforeach

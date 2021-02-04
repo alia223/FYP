@@ -5,8 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header" style="background-color: rgb(132,0,255); color: white;">{{ __('Confirm Password') }}</div>
-
+                <div class="card-header">{{ __('Confirm Password') }}</div>
                 <div class="card-body">
                     {{ __('Please confirm your password before continuing.') }}
 
@@ -34,7 +33,7 @@
                                 </button>
 
                                 @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}" style="background-color: rgb(132,0,255); color: white;">
+                                    <a class="btn btn-link" href="{{ route('password.request') }}">
                                         {{ __('Forgot Your Password?') }}
                                     </a>
                                 @endif

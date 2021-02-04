@@ -20,13 +20,49 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/home.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .btn {
+            background-color: <?php echo $rules[0]?>; 
+            color: <?php echo $rules[1]?>; 
+            margin-top:10px;
+            border-style: none;
+        }
+        .card-header {
+            background-color: <?php echo $rules[0]?>;
+            color: <?php echo $rules[1]?>;
+        }
+        a.active {
+            background-color: <?php echo $rules[0]?>;
+            color: <?php echo $rules[1]?>;
+        }
+        .btn:hover {
+            background-color: <?php echo $rules[0]?>;
+            color: <?php echo $rules[1]?>;
+        }
 
+        .sidebar{
+            min-height: 100%;
+        }
+
+        .today {
+            background-color: <?php echo $rules[0]?>;
+            color: <?php echo $rules[1]?>;
+        }
+
+        .custom-buttons {
+            width: 30px; 
+            height: 30px; 
+            padding:2px; 
+            margin: 0;"
+        }
+    </style>
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: rgb(132,0,255);">
+        <nav id="navbar" class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: <?php echo $rules[0]; ?>;">
             <div class="container">
-                <a class="navbar-brand" href="{{ route('home') }}" style="color: white;">
+                <a class="navbar-brand"id="navbar-brand" href="{{ route('home') }}" style="color:<?php echo $rules[1];?>;">
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -53,14 +89,14 @@
                             @endif
                         @else
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre style="color: white">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre style="color:<?php echo $rules[1];?>;">
                                     {{ Auth::user()->name }}
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();" style="color: rgb(132,0,255)">
+                                                     document.getElementById('logout-form').submit();" style="color:black;">
                                         {{ __('Logout') }}
                                     </a>
 

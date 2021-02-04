@@ -13,12 +13,13 @@
 <div class="container" style="margin:0; padding:0;">
   <div class="row justify-content-center">
       <div class="col-md-4">
-      <div class="sidebar">
-          <a class="active" href="{{ route('home') }}">Home</a>
+        <div class="sidebar">
+          <a class="active" id="active" href="{{ route('home') }}">Home</a>
           @if(Auth::check())
               @if (!Gate::denies('admin') && Gate::denies('clubstaff'))
                   <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
                   <a href="{{ route('past-bookings') }}">View Past Bookings</a>
+                  <a href="{{ route('club-rooms') }}">Rooms</a>
                   <a href="{{ route('activity-log') }}">Activity Log</a>
                   <a href="{{ route('control-panel') }}">Control Panel</a>
               @elseif (Gate::denies('admin') && Gate::denies('clubstaff'))
