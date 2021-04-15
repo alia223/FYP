@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\BookedStudent;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Models\Rule;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +21,25 @@ class BookedStudentController extends Controller
         $this->middleware('auth');
     }
     
+        /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {    
+        $booking = Booking::find($id);
+        $booked_students = BookedStudent::all();
+        $booked_students = $booked_students->where('bookingid', $id);
+        $children = array();
+        foreach($booked_students as $booked_student) {
+        $child = Student::find($booked_student->studentid);
+        array_push($children, $child);
+        }
+        return view('bookings.showBookedStudents', compact('children','booking'));
+    }
+
     /**
      * Show the form for editing the specified resource.
      *

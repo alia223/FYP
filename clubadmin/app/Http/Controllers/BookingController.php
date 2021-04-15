@@ -9,13 +9,15 @@ use App\Models\ClashedBooking;
 use App\Models\ClashedStudent;
 use App\Models\ActivityLog;
 use App\Models\Rule;
-use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Gate;
-
+use DatePeriod;
+use DateInterval;
+use DB;
 class BookingController extends Controller
 {
+
         /**
      * Create a new controller instance.
      *
@@ -33,12 +35,12 @@ class BookingController extends Controller
      */
     public function index()
     {
-        //
+        $rules = Rule::all();
         $bookings = Booking::all();
         if(Gate::denies('admin') && Gate::denies('clubstaff')) {
             $bookings = $bookings->where('userid', Auth::id());
         }
-        return view('bookings.upcomingBookings', array('bookings'=>$bookings));
+        return view('bookings.booking', compact('bookings', 'rules'));
     }
     
     /**
@@ -46,11 +48,12 @@ class BookingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
+        $date = $request->input('date');
         $students = Student::all();
-        $students = $students->where('parentid',Auth::id());
-        return view('bookings.createBooking', array('students'=>$students));
+        $students = $students->where('parentid', Auth::id());
+        return view('bookings.createBooking', compact('students'))->with('date', $date);
     }
 
     /**
@@ -64,10 +67,12 @@ class BookingController extends Controller
         // form validation
         $booking = $this->validate(request(), [
             'booking_length' => 'required|string',
-            'hiddenDay' => 'required|string',
-            'hiddenMonth' => 'required|string',
-            'hiddenYear' => 'required|string',
+            'date' => 'required|string',
             'students' => 'required|array'
+        ],
+        [
+            'booking_length.required' => 'Please select the duration of your booking.',
+            'students.required' => 'Please select at least one child'
         ]);
         // create a Booking object and set its values from the input
         $rules = Rule::all();
@@ -75,82 +80,78 @@ class BookingController extends Controller
         foreach($rules as $rule) {
             $club_start_time = $rule->club_start;
         }
+        //calculate eventid for this set of repeat bookings
+        $event = Booking::orderBy('created_at', 'desc')->first();
+        $eventid = 1;
+        if(!empty($event)) {
+            $eventid = $event->eventid + 1;
+        }
+        //store booking details based on inputs
         $booking = new Booking;
         $booking->userid = Auth::id();
         $booking->name = Auth::user()->name;
         $duration = $request->input('booking_length');
         $booking_length = "+".$duration." minutes";
         $booking->start_time = $club_start_time;
+        //calculate end time by using values of start time and duration selected by customer
         $booking->end_time = date("H:i:s", strtotime($booking_length, strtotime($club_start_time)));
         $booking->duration = $duration;
-        $day = $request->input('hiddenDay');
-        $month = $request->input('hiddenMonth');
-        $year = $request->input('hiddenYear');
-        $date = $day."-".$month."-".$year;
-        $time = strtotime($date);
-        $newformat = date('Y-m-d',$time);
-        $booking->booking_date = $newformat;
-        $bookings = Booking::all();
+        //store date of booking in yyyy-mm-dd format
+        $date = date('Y-m-d', strtotime($request->input('date')));
+        $booking->booking_date = $date;
+        $booking->booking_day = date('w', strtotime($request->input('date')));
+        $booking->eventid = $eventid;
+        //before saving the booking, get all bookings by all customers
+        $bookings = Booking::all()->where('booking_date', $date);
+        //array that contains id's of already booked students that are saved in database
         $booked_student_ids = array();
         //check to see if booking is valid
         foreach($bookings as $b) {
-            $booked_students = BookedStudent::all()->where('parentid', Auth::id());
+            //loop through all booked students for this particular parent, and add the id's of the students to array
+            $booked_students = BookedStudent::all()->where('parentid', Auth::id())->where('booking_date', $date);
             foreach($booked_students as $booked_student) {
                 array_push($booked_student_ids, $booked_student->studentid);
             }
+            //whilst looping through all bookings, if parent is making a booking on a day where they have already made a booking
+            //a check needs to be done to ensure that they are not make the booking on the same day for a child already booked in
+            //same day booking, different child(ren) is totally fine
             if($booking->booking_date == $b->booking_date) {
+                //get student(s) associated with booking that the parent is trying to make 
                 $students = $request->input('students');
+                //loop through students
                 foreach($students as $student) {
+                    //check if id of this/these student(s) in id array
+                    //if so, this means aprent has already made a booking for this child on this day so return error message to user
                     if(in_array($student, $booked_student_ids)) {
-                        return back()->withErrors(['errors' => ['You have already made a similar booking on this date']]);
+                        return back()->withErrors(['errors' => ['Booking unsuccessful as it clashes with the following booking:', Student::find($student)->first_name.' '.Student::find($student)->last_name.' on '.$b->booking_date.' at '.$b->start_time.' - '.$b->end_time]]);
                     }
                 }
             }
         }
-
-        // save the Booking object
-        //but before you do, update the database to account for the fact that some students are taking up space in the classroom being used for the club
-        $room_capacity = 0;
-        foreach($rules as $rule) {
-            $room_capacity = $rule->room_capacity;
-        }
-        $rooms = Room::all();
-        $roomid = 0;
-        $roomFound = false;
-            foreach($rooms as $room) {
-                if(!$roomFound) {
-                $accumulator = 0;
-                $bookings = Booking::all()->where('booking_date', $newformat)->where('roomid', $room->id);
-                foreach($bookings as $b) {
-                    $booked_students = BookedStudent::all()->where('bookingid', $b->id);
-                    $accumulator = $accumulator + count($booked_students);
-                }
-                error_log($accumulator + sizeof($request->input('students')));
-                if($accumulator + sizeof($request->input('students')) <= $room_capacity) {
-                    $roomid = $room->id;
-                    $roomFound = true;
-                }
-            }
-        }
-        if(!$roomFound) {
-            return back()->withErrors(['errors' => ['There are no more bookings available.']]);
-        }
-        $booking->roomid = $roomid;
         $booking->save();
+        //students associated with this booking
         $students = $request->input('students');
+        //as long as there are actually students selected
         if(!empty($students)) {
+            //loop through students and create a new booking for that student
             foreach($students as $student) {
                 $booked_students = new BookedStudent;
                 $booked_students->parentid = Auth::id();
                 $booked_students->bookingid = $booking->id;
                 $booked_students->studentid = $student;
-                $booked_students->roomid = $roomid;
+                $booked_students->booking_date = $date;
+                $booked_students->booking_day = date('w', strtotime($request->input('date')));
+                $booked_students->start_time = $booking->start_time;
+                $booked_students->end_time = $booking->end_time;
+                $booked_students->eventid = $eventid;
                 $booked_students->save();
             }
         }
+        
+        //activity log info
         $activity = new ActivityLog;
         $activity->action = "Created a booking";
-        $activity->booking_id = $booking->id;
+        $activity->bookingid = $booking->id;
         $activity->userid = Auth::id();
         $activity->user = Auth::user()->name;
         $activity->save();
@@ -164,19 +165,13 @@ class BookingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($date)
     {
-        //
-        $booking = Booking::find($id);
-        $booked_students = BookedStudent::all();
-        $booked_students = $booked_students->where('bookingid', $id);
-        $children = array();
-        foreach($booked_students as $booked_student) {
-            $child = Student::find($booked_student->studentid);
-            array_push($children, $child);
+        $bookings = Booking::all()->where('booking_date', $date);
+        if(Gate::denies('admin') && Gate::denies('clubstaff')) {
+            $bookings = $bookings->where('userid', Auth::id());
         }
-
-        return view('bookings.showBooking', compact('children','booking'));
+        return view('bookings.showBookings', compact('bookings'))->with('date', $date);
     }
 
     /**
@@ -203,7 +198,8 @@ class BookingController extends Controller
             }
             $students = Student::all()->where('parentid', $parentid);
         }
-        return view('bookings.editBooking',compact('booking', 'students','booked_students'));
+        $bookings = Booking::all();
+        return view('bookings.editBooking',compact('booking', 'students','booked_students', 'bookings'));
     }
 
     /**
@@ -218,7 +214,6 @@ class BookingController extends Controller
         //
         $this->validate(request(), [
             'booking_length' => 'required|string',
-            'booking_date' => 'required|string',
             'students' => 'required|array'
         ]);
         $rules = Rule::all();
@@ -226,62 +221,52 @@ class BookingController extends Controller
         foreach($rules as $rule) {
             $club_start_time = $rule->club_start;
         }
+        //find booking which user is requesting to update
         $booking = Booking::find($id);
+        //update booking with new info
         $duration = $request->input('booking_length');
         $booking_length = "+".$duration." minutes";
-        $booking->start_time = $club_start_time;
+        $booking->start_time = date('H:i:s', strtotime($club_start_time));
         $booking->end_time = date("H:i:s", strtotime($booking_length, strtotime($club_start_time)));
         $booking->duration = $duration;
-        $booking->booking_date = $request->input('booking_date');
+        $booking->booking_date = $booking->booking_date;
+        $booking->booking_day = date('w', strtotime($request->input('date')));
+        $booking->eventid = $booking->eventid;
+        //besides the booking itself, get all other bookings
         $bookings = Booking::all()->where('id','!=',$id)->where('userid', $booking['userid']);
         $booked_student_ids = array();
         //check to see if booking is valid
         foreach($bookings as $b) {
-            $booked_students = BookedStudent::all()->where('bookingid','!=',$id)->where('parentid', $booking['userid']);
+            //get all bookings that this parent has made, except booking being updated
+            //reason for this is because I am going to be chcecking to make sure that the booking with the new information isn't already an existing booking
+            //However, if I include the updated booking too then I will be comparing the updated booking WITH the updated booking and so of course this updated booking will seemingly exist
+            //therefore, compared this updated booking to all other bookings except itself (obviously)
+            $booked_students = BookedStudent::all()->where('bookingid','!=',$id)->where('parentid', $booking['userid'])->where('booking_date', $booking->booking_date);
             foreach($booked_students as $booked_student) {
+                //store ids of students that are already booked
                 array_push($booked_student_ids, $booked_student->studentid);
             }
+            //if the newly updated info means that the booking is another the same date as another booking with the same students selected
+            //this is a clash and so inform user of this
             if($booking->booking_date == $b->booking_date) {
                 $students = $request->input('students');
                 foreach($students as $student) {
                     if(in_array($student, $booked_student_ids)) {
-                        return back()->withErrors(['errors' => ['You have already made a similar booking on this date']]);
+                        return back()->withErrors(['errors' => ['Booking unsuccessful as it clashes with the following booking:', Student::find($student)->first_name.' '.Student::find($student)->last_name.' on '.$b->booking_date.' at '.$b->start_time.' - '.$b->end_time]]);
                     }
                 }
             }
         }
-        // save the Booking object
-        //but before you do, update the database to account for the fact that some students are taking up space in the classroom being used for the club
-        $room_capacity = 0;
-        foreach($rules as $rule) {
-            $room_capacity = $rule->room_capacity;
-        }
-        $rooms = Room::all();
-        $roomid = 0;
-        $roomFound = false;
-            foreach($rooms as $room) {
-                if(!$roomFound) {
-                $accumulator = 0;
-                $bookings = Booking::all()->where('booking_date',  $request->input('booking_date'))->where('roomid', $room->id)->where('id','!=', $id);
-                foreach($bookings as $b) {
-                    $booked_students = BookedStudent::all()->where('bookingid', $b->id);
-                    $accumulator = $accumulator + count($booked_students);
-                }
-                error_log($accumulator + sizeof($request->input('students')));
-                if($accumulator + sizeof($request->input('students')) <= $room_capacity) {
-                    $roomid = $room->id;
-                    $roomFound = true;
-                }
-            }
-        }
-        if(!$roomFound) {
-            return back()->withErrors(['errors' => ['There are no more bookings available.']]);
-        }
-        $booking->roomid = $roomid;
         $booking->save();
         //Check is complete so just update booked students related to this booking by clearing whatever choice is already stored in db
         //and replacing students with newly selected(and checked) students
         $booked_students = BookedStudent::withTrashed()->where('bookingid', $id)->get();
+        //rather than using Auth::id, because admin can also update booked students and thus admin will use the id associated with Auth::id 
+        //Auth::id woudnt give the correct booked students as admin doesn't have booked students
+        //instead use the booking id that is stored in the buttons value
+        //when user clicks edit booking button, id is sent to controller,
+        //find any booked student and just get the parentid associated with that booked student
+        //now admin can use parents id without needing Auth::id()
         $parentid = 0;
         foreach($booked_students as $booked_student) {
             $parents = User::all()->where('id', $booked_student->parentid);
@@ -289,13 +274,13 @@ class BookingController extends Controller
                 $parentid = $parent->id;
             }
         }
-        $roomids = array();
         foreach($booked_students as $booked_student) {
-            array_push($roomids, $booked_student->roomid);
+            //delete the booked student record
             $booked_student->forceDelete();
         }
+        //get booked students that user is selecting
         $students = $request->input('students');
-        $i = 0;
+        //save new booked student records as long as parent has actually seleceted atleast one student
         if(!empty($students)) {
             foreach($students as $student) {
                 $booked_students = new BookedStudent;
@@ -307,13 +292,16 @@ class BookingController extends Controller
                 }
                 $booked_students->bookingid = $booking->id;
                 $booked_students->studentid = $student;
-                $booked_students->roomid = $roomids[$i];
+                $booked_students->booking_date = $booking->booking_date;
+                $booked_students->booking_day = date('w', strtotime($request->input('date')));
+                $booked_students->start_time = $booking->start_time;
+                $booked_students->end_time = $booking->end_time;
+                $booked_students->eventid = $booking->eventid;
                 $booked_students->save();
             }
-            $i++;
         }
         $activity = new ActivityLog;
-        $activity->booking_id = $id;
+        $activity->bookingid = $id;
         $activity->action = "Updated a booking";
         $activity->userid = Auth::id();
         $activity->user = Auth::user()->name;
@@ -329,24 +317,23 @@ class BookingController extends Controller
      */
     public function destroy($id)
     {
-        //
-        $booking = Booking::find($id);
-        $booking->delete();
+        //First, delete students associate with booking due to foregin key constraints
         $booked_students = BookedStudent::all();
         $booked_students = $booked_students->where('bookingid', $id);
         foreach($booked_students as $booked_student) {
             $booked_student->delete();
         }
+        $booking = Booking::find($id);
+        $booking->delete();
+
 
         $activity = new ActivityLog;
         $activity->action = "Deleted a booking";
-        $activity->booking_id = $id;
+        $activity->bookingid = $id;
         $activity->userid = Auth::id();
         $activity->user = Auth::user()->name;
         $activity->save();
         return redirect('bookings')->with('success','Booking has been deleted');
         
     }
-
-
 }

@@ -14,26 +14,7 @@
     <div class="row justify-content-center">
         <div class="col-md-3">
             <div class="sidebar">
-                <a href="{{ route('home') }}">Home</a>
-                @if(Auth::check())
-                    @if (!Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a href="{{ route('activity-log') }}">Activity Log</a>
-                        <a href="{{ route('control-panel') }}">Control Panel</a>
-                    @elseif (Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a href="{{ route('create-bookings') }}?ym=<?php $date = date('Y-m'); echo $date?>">Create a Booking</a>
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a class="active" href="{{ route('club-students') }}">Children</a>
-                    @elseif (Gate::denies('admin') && !Gate::denies('clubstaff'))
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('student-register') }}">Student Register</a>
-                        <a href="{{ route('student-behaviour-report') }}">Behaviour Record</a>
-                        <a href="{{ route('student-injury-report') }}">Injury Record</a>
-                    @endif
-                @endif
-                <a href="{{ route('settings') }}">Settings</a>
+                @include('sidebar')            
             </div>
         </div>
         <div class="col-md-9" style="margin-top: 50px;">
@@ -103,7 +84,8 @@
         </div>
     </div>
 </div>
-<script>
+<script type="text/javascript"> 
+    $('#students').addClass('active');
     $('#student_dietary_requirements').change(function() {
         if(document.getElementById('student_dietary_requirements').options[document.getElementById('student_dietary_requirements').selectedIndex].value === "Other") {
             document.getElementById('other').innerHTML = '<label class="font-weight-bold" for="student_other">If other, please specify: </label><textarea  name="student_other" id="student_other" required></textarea>';

@@ -4,26 +4,7 @@
     <div class="row justify-content-center">
         <div class="col-md-3">
             <div class="sidebar">
-                <a href="{{ route('home') }}">Home</a>
-                @if(Auth::check())
-                    @if (!Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a class="active"  href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a href="{{ route('club-rooms') }}">Rooms</a>
-                        <a href="{{ route('activity-log') }}">Activity Log</a>
-                        <a href="{{ route('control-panel') }}">Control Panel</a>
-                    @elseif (Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a href="{{ route('create-bookings') }}?ym=<?php $date = date('Y-m'); echo $date?>">Create a Booking</a>
-                        <a class="active" href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a href="{{ route('club-students') }}">Children</a>
-                    @elseif (Gate::denies('admin') && !Gate::denies('clubstaff'))
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('student-register') }}">Register</a>
-                        <a href="{{ route('club-students') }}">Students</a>
-                    @endif
-                @endif
-                <a href="{{ route('settings') }}">Settings</a>
+                @include('sidebar')            
             </div>
         </div>
         <div class="col-md-9" style="margin-top: 50px;">
@@ -43,37 +24,45 @@
                             <p>{{ \Session::get('success') }}</p>
                         </div><br />
                     @endif
-                    <div class="card-body">
-                    <form class="form-horizontal" method="POST" action="{{ action('App\Http\Controllers\BookingController@update', $booking['id']) }} " enctype="multipart/form-data" >
+                <div class="card-body">
+                    <form class="form-horizontal" id="form" action="{{ action('App\Http\Controllers\BookingController@update', $booking['id']) }}" method="POST" enctype="multipart/form-data" >
                         @method('PATCH')
                         @csrf
-                        <div class="col-md-8">
-                            <label class="font-weight-bold">Date</label><br />
-                            <input type="date" name="booking_date" value="{{$booking->booking_date}}"/>
-                        </div>
-                        <label for="food-arrangement" class="font-weight-bold">How long would you like your child to attend the club for?</label>
-                                        <?php for($i = 1; $i <= 6;$i+=1) {
-                                            $val = 30 * $i;
-                                            echo '<div class="row offset-md-1">';
-                                            if($booking->duration == $val) {
-                                                echo '<input type="radio" id="'.$val.'" name="booking_length" value="'.$val.'" checked/>';
-                                            }
-                                            else {
-                                                  echo '<input type="radio" id="'.$val.'" name="booking_length" value="'.$val.'" />';
-                                            }
-                                            echo '&nbsp&nbsp';
-                                            echo '<label for="'.$val.'">';
-                                            if($val == 60) {
-                                                $val = $val/60;
-                                                echo $val." hour";
-                                            }
-                                            else {
-                                                $val = $val/60;
-                                                echo $val." hours";
-                                            }
-                                            echo '</label><br>';
-                                            echo '</div>';
-                                        }?>
+                        <label for="booking_length" class="font-weight-bold">How long would you like your child to attend the club for?</label>
+                        <table style="width:60%;">
+                        <tr><th></th></tr>
+                        <?php 
+                        $termination = (strtotime($rules[3])-strtotime($rules[2]))/60;
+                        for($i = 0;$i <= $termination/intval($rules[4]);$i++) {
+                            echo '<tr>';
+                            for($j = 0; $j < 4; $j++) {
+                                if($i !== $termination/intval($rules[4])) {
+                                    $i++;
+                                    $val = intval($rules[4]) * $i;
+                                    echo '<td><div class="row offset-md-1">';
+                                    if($booking->duration == $val) {
+                                        echo '<input type="radio" id="'.$val.'" name="booking_length" id="booking_length" value="'.$val.'" checked/>&nbsp&nbsp';
+                                    }
+                                    else {
+                                        echo '<input type="radio" id="'.$val.'" name="booking_length" id="booking_length" value="'.$val.'"/>&nbsp&nbsp';
+                                    }
+                                    echo '<label for="'.$val.'">';
+                                    if($val == 60) {
+                                        $val = $val/60;
+                                        echo $val." hour";
+                                    }
+                                    else {
+                                        $val = $val/60;
+                                        echo $val." hours";
+                                    }
+                                    echo '</label><br>';
+                                    echo '</div></td>';
+                                }
+                            }
+                            echo '</tr>';
+                            
+                        }?>
+                        </table>
                         <p class="font-weight-bold">Which children will be attending?</p>
                         <?php    
                             $i = 0;
@@ -82,11 +71,10 @@
                                     echo '<input style="margin-right:10px;" type="checkbox" name="students[]" value="'.$student['id'].'"  checked/>'
                                 .'<label for="students[]">'.$student['first_name'].' '.$student['last_name'].'</label>&nbsp&nbsp';
                                 }
-                                elseif($booked_students->where('studentid', $student['id'])) {
+                                else {
                                     echo '<input style="margin-right:10px;" type="checkbox" name="students[]" value="'.$student['id'].'" />'
                                 .'<label for="students[]">'.$student['first_name'].' '.$student['last_name'].'</label>&nbsp&nbsp';
                                 }
-                                
                                 $i++;
                             }
                             if(!Gate::denies('admin')) {
@@ -94,17 +82,29 @@
                                     echo '<p style="color: red">No children were selected</p>';
                                 }
                             }
-
-                        ?>
-                        <div class="col-md-6 col-md-offset-4">
-                            <input type="submit" class="btn btn-primary" />
-                            <input type="reset" class="btn btn-primary" />
-                            </a>
-                        </div>
+                        ?><br />
+                        @if(sizeof($bookings->where('eventid', $booking['eventid'])) > 1)
+                            <label for="repeat_apply" class="font-weight-bold">This is a repeat booking. <br />Tick the box below if you would like to make this change to all of the other bookings too.</label><br />
+                            <input type="checkbox" id="repeat_apply" /><br />
+                        @endif
+                        <input type="submit" id="submit" class="btn btn-primary" />
+                        <input type="reset" class="btn btn-primary" />
+                        </a>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script type="text/javascript"> 
+    $('#bookings').addClass('active'); 
+    $('#repeat_apply').change(function() {
+        if($('#repeat_apply').is(":checked")) {
+            $('#form').attr('action', "{{ action('App\Http\Controllers\RepeatBookingController@update', $booking['id']) }}");
+        }
+        else {
+            $('#form').attr('action', "{{ action('App\Http\Controllers\BookingController@update', $booking['id']) }}");
+        }
+    });
+</script>
 @endsection

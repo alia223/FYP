@@ -14,27 +14,29 @@ class CreateRulesTable extends Migration
     public function up()
     {
         Schema::create('rules', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
+            $table->string('brand_logo')->nullable();
             $table->string('brand_colour');
             $table->string('text_colour');
             $table->string('club_start');
             $table->string('club_end');
             $table->integer('club_duration_step');
             $table->integer('booking_interval');
-            $table->integer('room_capacity')->default('30');
+            $table->integer('student_ratio');
             $table->timestamps();
         });
 
         // Insert some stuff
         DB::table('rules')->insert(
             array(
+                'brand_logo' => 'brand_logo.png',
                 'brand_colour' => '#8400ff',
                 'text_colour' => '#ffffff',
-                'club_start' => '15:30',
-                'club_end' => '19:30',
+                'club_start' => '15:30:00',
+                'club_end' => '19:30:00',
                 'club_duration_step' => '30',
-                'booking_interval' => '3',
-                'room_capacity' => '30'
+                'booking_interval' => '0',
+                'student_ratio' => '6'
             )
         );
     }

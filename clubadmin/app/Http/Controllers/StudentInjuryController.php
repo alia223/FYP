@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Injury;
 use App\Models\Student;
 use Illuminate\Http\Request;
-use Gate;
 use Auth;
 
 class StudentInjuryController extends Controller

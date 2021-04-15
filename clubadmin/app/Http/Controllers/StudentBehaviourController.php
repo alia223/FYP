@@ -5,7 +5,6 @@ use Auth;
 use App\Models\Behaviour;
 use App\Models\Student;
 use Illuminate\Http\Request;
-use Gate;
 
 class StudentBehaviourController extends Controller
 {

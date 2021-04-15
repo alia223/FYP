@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActivityLogsTable extends Migration
+class CreateStaffHoursTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,12 @@ class CreateActivityLogsTable extends Migration
      */
     public function up()
     {
-        Schema::create('activity_logs', function (Blueprint $table) {
+        Schema::create('staff_hours', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('action');
-            $table->bigInteger('bookingid')->unsigned();
-            $table->bigInteger('userid')->unsigned();
-            $table->string('user');
+            $table->bigInteger('staffid')->unsigned();
+            $table->integer('total_duration_worked_this_week');
             $table->timestamps();
-            $table->foreign('userid')->references('id')->on('users'); 
+            $table->foreign('staffid')->references('id')->on('users'); 
         });
     }
 
@@ -31,6 +29,6 @@ class CreateActivityLogsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('activity_logs');
+        Schema::dropIfExists('staff_hours');
     }
 }

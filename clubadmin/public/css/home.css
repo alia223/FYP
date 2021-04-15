@@ -49,7 +49,7 @@ th {
   text-align: center;
 }
 td {
-  height: 80px;
+  height: 30px;
 }
 
 th:nth-of-type(6), td:nth-of-type(6) {

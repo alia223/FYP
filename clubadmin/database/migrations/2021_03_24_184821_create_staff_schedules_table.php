@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBehavioursTable extends Migration
+class CreateStaffSchedulesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,14 @@ class CreateBehavioursTable extends Migration
      */
     public function up()
     {
-        Schema::create('behaviours', function (Blueprint $table) {
+        Schema::create('staff_schedules', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('staffid')->unsigned();
-            $table->bigInteger('studentid')->unsigned();
-            $table->date('date');
-            $table->string('stars');
-            $table->string('comment');
+            $table->integer('day');
+            $table->string('available_from')->nullable();
+            $table->string('available_until')->nullable();
             $table->timestamps();
             $table->foreign('staffid')->references('id')->on('users'); 
-            $table->foreign('studentid')->references('id')->on('students');
         });
     }
 
@@ -33,6 +31,6 @@ class CreateBehavioursTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('behaviours');
+        Schema::dropIfExists('staff_schedules');
     }
 }

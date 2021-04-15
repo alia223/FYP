@@ -14,18 +14,22 @@ class CreateBookedStudentsTable extends Migration
     public function up()
     {
         Schema::create('booked_students', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->bigInteger('parentid')->unsigned();
             $table->bigInteger('bookingid')->unsigned();
+            $table->integer('eventid');
             $table->bigInteger('studentid')->unsigned();
-            $table->bigInteger('roomid')->unsigned();
-            $table->integer('attendance')->default('0');
+            $table->date('booking_date');
+            $table->integer('booking_day');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->time('checked_in')->nullable();
+            $table->time('checked_out')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('parentid')->references('id')->on('users'); 
             $table->foreign('bookingid')->references('id')->on('bookings'); 
             $table->foreign('studentid')->references('id')->on('students'); 
-            $table->foreign('roomid')->references('id')->on('rooms'); 
         });
     }
 

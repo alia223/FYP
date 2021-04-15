@@ -5,7 +5,6 @@ use App\Models\Booking;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Gate;
 
 class CreateBookingsController extends Controller
 {
@@ -26,6 +25,6 @@ class CreateBookingsController extends Controller
      */
     public function index()
     {
-        return view('bookings.booking');
+
     }
 }

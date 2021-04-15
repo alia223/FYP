@@ -14,25 +14,7 @@
     <div class="row justify-content-center">
         <div class="col-md-3">
             <div class="sidebar">
-                <a href="{{ route('home') }}">Home</a>
-                @if(Auth::check())
-                    @if (!Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a href="{{ route('activity-log') }}">Activity Log</a>
-                        <a href="{{ route('control-panel') }}">Control Panel</a>
-                    @elseif (Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a href="{{ route('create-bookings') }}?ym=<?php $date = date('Y-m'); echo $date?>">Create a Booking</a>
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a href="{{ route('club-students') }}">Children</a>
-                    @elseif (Gate::denies('admin') && !Gate::denies('clubstaff'))
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a class="active" href="{{ route('student-register') }}">Register</a>
-                        <a href="{{ route('club-students') }}">Students</a>
-                    @endif
-                @endif
-                <a href="{{ route('settings') }}">Settings</a>
+                @include('sidebar')            
             </div>
         </div>
         <div class="col-md-9" style="margin-top: 50px;">
@@ -62,7 +44,7 @@
                                         <td class="text-center">{{$student['dietary_requirements']}}</td>
                                     @endif
                                     <td class="text-center">{{$student['food_arrangement']}}</td>
-                                    <td>
+                                    <td style="display: flex;">
                                     <form class="form-horizontal" method="POST" action="{{ action('App\Http\Controllers\StudentRegisterController@update', $student['id']) }} " enctype="multipart/form-data" >
                                     @method('PATCH')
                                     @csrf
@@ -71,19 +53,27 @@
                                         foreach($booked_students as $booked_student) {
                                             if($carry_on) {
                                                 if($student['id'] == $booked_student['studentid']) {
-                                                    if($booked_student['attendance'] == 0) {
-                                                        echo '<input type="submit" class="btn" value="Check" />';
+                                                    if($booked_student['checked_in'] == null) {
+                                                        echo '<input type="submit" class="btn" value="Check In" />';
                                                         $carry_on = false;
                                                     }
-                                                    else {
-                                                        echo '<input type="submit" class="btn" value="Check"style="background-color: green;" />';
+                                                    else if($booked_student['checked_in'] != null && $booked_student['checked_out'] == null) {
+                                                        echo '<input type="submit" class="btn" value="Check Out" />';
                                                         $carry_on = false;
+                                                    }
+                                                    else if($booked_student['checked_in'] != null && $booked_student['checked_out'] == null) {
+                                                        echo '<input type="submit" class="btn" value="Check In" />';
                                                     }
                                                 }
                                             }
                                         }
                                         $carry_on = true;
                                     ?>
+                                    </form>
+                                    <form style="margin-left: 5px;" class="form-horizontal" method="POST" action="{{ action('App\Http\Controllers\StudentRegisterUndoController@update', $student['id']) }} " enctype="multipart/form-data" >
+                                    @method('PATCH')
+                                    @csrf
+                                        <button type="submit" class="btn material-icons" value="Undo">undo</button>
                                     </form>
                                     </td>
                                     </tr>
@@ -95,6 +85,9 @@
         </div>
     </div>
 </div>
+<script type="text/javascript"> 
+    $('#register').addClass('active'); 
+</script>
 @endsection
 </body>
 </html>

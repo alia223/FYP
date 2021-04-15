@@ -30,12 +30,12 @@ class PastBookingsController extends Controller
     {
         //
         if(Gate::denies('admin')) {
-            $bookings = Booking::withTrashed()->where('booking_date','<', date('Y-m-d'))->orWhereNotNull('deleted_at')->get();
-            $bookings = $bookings->where('userid', Auth::id());
+            $bookings = Booking::withTrashed()->where('booking_date','<', date('Y-m-d'))->orWhereNotNull('deleted_at');
+            $bookings = $bookings->where('userid', Auth::id())->paginate(3);
             return view('bookings.showPastBookings', array('bookings'=>$bookings));
         }
         else {
-            $bookings = Booking::withTrashed()->where('booking_date','<', date('Y-m-d'))->orWhereNotNull('deleted_at')->get();
+            $bookings = Booking::withTrashed()->where('booking_date','<', date('Y-m-d'))->orWhereNotNull('deleted_at')->paginate(3);
         }
         return view('bookings.showPastBookings', array('bookings'=>$bookings));
     }
@@ -102,6 +102,6 @@ class PastBookingsController extends Controller
         $activity->userid = Auth::id();
         $activity->user = Auth::user()->name;
         $activity->save();
-        return redirect('past_bookings')->with('success','Booking has been permanently deleted');
+        return redirect('past-bookings')->with('success','Booking has been permanently deleted');
     }
 }

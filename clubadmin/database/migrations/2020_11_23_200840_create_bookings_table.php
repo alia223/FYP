@@ -18,14 +18,14 @@ class CreateBookingsTable extends Migration
             $table->bigInteger('userid')->unsigned();
             $table->string('name', 255);
             $table->date('booking_date');
+            $table->integer('booking_day');
             $table->time('start_time');
             $table->time('end_time');
             $table->string('duration');
-            $table->bigInteger('roomid')->unsigned();
+            $table->bigInteger('eventid')->unsigned();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('userid')->references('id')->on('users'); 
-            $table->foreign('roomid')->references('id')->on('rooms'); 
         });
     }
 

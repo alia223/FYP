@@ -22,6 +22,9 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+        }
         .btn {
             background-color: <?php echo $rules[0]?>; 
             color: <?php echo $rules[1]?>; 
@@ -42,12 +45,7 @@
         }
 
         .sidebar{
-            min-height: 100%;
-        }
-
-        .today {
-            background-color: <?php echo $rules[0]?>;
-            color: <?php echo $rules[1]?>;
+            
         }
 
         .custom-buttons {
@@ -56,13 +54,32 @@
             padding:2px; 
             margin: 0;"
         }
+        .alert{
+            margin: 0;
+            padding: 0;
+        }
+        .card-body {
+            margin: 0;
+        }
+        .red-star {
+            color: red;
+        }
+        .pagination { 
+            justify-content: center; 
+            margin-top: 10px;
+        }
+
+        td {
+            height: 30px;
+        }
     </style>
 </head>
 <body>
     <div id="app">
-        <nav id="navbar" class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: <?php echo $rules[0]; ?>;">
+        <nav id="navbar" class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: <?php echo $rules[0]; ?>; padding: 0;">
             <div class="container">
-                <a class="navbar-brand"id="navbar-brand" href="{{ route('home') }}" style="color:<?php echo $rules[1];?>;">
+            <img src="storage/images/<?php echo $rules[7] ?>" height="35px" width="35px" style="margin-right: 10px;"/>
+                <a class="navbar-brand" id="navbar-brand" href="{{ url('home') }}" style="color:<?php echo $rules[1];?>; padding: 0;">
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">

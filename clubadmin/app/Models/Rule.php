@@ -14,5 +14,5 @@ class Rule extends Model
     *
     * @var array
     */
-    protected $fillable = ['brand_colour', 'text_colour', 'club_start', 'end_start', 'club_duration_step', 'booking_interval'];
+    protected $fillable = ['brand_logo', 'brand_colour', 'text_colour', 'club_start', 'end_start', 'club_duration_step', 'booking_interval', 'student_ratio'];
 }

@@ -9,7 +9,6 @@ use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Gate;
-use DB;
 
 class StudentController extends Controller
 {
@@ -31,20 +30,9 @@ class StudentController extends Controller
     public function index()
     {
         $students = Student::all();
-        if(Gate::denies('clubstaff')) {
+        //if parent is logged in, show their own children to them
+        if(Gate::denies('clubstaff') && Gate::denies('admin')) {
             $students = Student::all()->where('parentid',Auth::id());
-        }
-        else {
-            $roomid = 0;
-            $booked_students = BookedStudent::all();
-            $rooms = Room::all()->where('staffid', Auth::id());
-            foreach($rooms as $room) {
-                $roomid = $room->id;
-                $booked_students = $booked_students->where('roomid', $roomid);
-            }
-            $students = DB::table('students')->join('booked_students', 'students.id', '=', 'booked_students.studentid')->where('roomid', $roomid)->select('students.*')->get();
-            error_log($students);
-            $students = json_decode(json_encode($students), true);
         }
         return view('students.showStudents',compact('students'));
     }
@@ -82,7 +70,7 @@ class StudentController extends Controller
             $student->date_of_birth = $request->input('student_date_of_birth');
             $student->dietary_requirements = $request->input('student_dietary_requirements');
             $student->food_arrangement = $request->input('student_food_arrangement');
-            $students = Student::all();
+            $students = Student::all()->where('parentid', Auth::id());
             foreach($students as $s) {
                 if($s->first_name == $student->first_name && $s->last_name == $student->last_name && $s->date_of_birth == $student->date_of_birth) {
                     return back()->withErrors(['error' => ['You have already have this child\'s details saved.']]);
@@ -160,23 +148,30 @@ class StudentController extends Controller
      */
     public function destroy($id)
     {
-        $student = Student::find($id);
-        $booked_students = BookedStudent::withTrashed()->get();
-        $booked_students = $booked_students->where('studentid', $id);
-        $booking_id = 0;
+        //fetch all instances where this student is associated with a booking
+        $booked_students = BookedStudent::all()->where('studentid', $id);
+        //array to store the id of the booking that the soon to be deleted booekd_student instance relates to
+        $booked_student_bookingids = array();
         foreach($booked_students as $booked_student) {
-            $booking_id = $booked_student->bookingid;
+            //store the booking id of this instance of the student that is booked in
+            array_push($booked_student_bookingids, $booked_student->bookingid);
+            //delete this instance of this student being booked in
             $booked_student->forceDelete();
         }
-        $booking = Booking::find($booking_id);
-        error_log($booking);
-        if(!empty($booking)) {
-            $booked_students = BookedStudent::where('bookingid', $booking->id)->first();
-            if(empty($booked_students)) {
-            $booking->forceDelete(); 
+        //delete all bookings that this student is associated with
+        foreach($booked_student_bookingids as $bsbid) {
+            //fetch all bookings this student is associated with
+            $booked_student = BookedStudent::all()->where('bookingid', $bsbid)->first();
+            //if these bookings have other students attatched to it as well (i.e. siblings of soon to be deleted student)
+            //then don't delete the booking, jsut delete the student from the sysetm and booked_students table and then the booking will appear
+            //without showing this child as it doesn't exist anymore
+            if(empty($booked_student)) {
+                //this student was the only student that belongs to this booking, so delete whole booking as student no longer exists in system anyway
+                Booking::find($bsbid)->forceDelete();
             }
         }
-        $student->forceDelete();
+        //delete student
+        Student::find($id)->delete();
         return redirect('students');
     }
 }

@@ -4,26 +4,7 @@
     <div class="row justify-content-center">
         <div class="col-md-3">
             <div class="sidebar">
-                <a href="{{ route('home') }}">Home</a>
-                @if(Auth::check())
-                    @if (!Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a href="{{ route('club-rooms') }}">Rooms</a>
-                        <a href="{{ route('activity-log') }}">Activity Log</a>
-                        <a class="active" id="active" href="{{ route('control-panel') }}">Control Panel</a>
-                    @elseif (Gate::denies('admin') && Gate::denies('clubstaff'))
-                        <a href="{{ route('create-bookings') }}?ym=<?php $date = date('Y-m'); echo $date?>">Create a Booking</a>
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('past-bookings') }}">View Past Bookings</a>
-                        <a href="{{ route('club-students') }}">Children</a>
-                    @elseif (Gate::denies('admin') && !Gate::denies('clubstaff'))
-                        <a href="{{ url('bookings') }}">View Upcoming Bookings</a>
-                        <a href="{{ route('student-register') }}">Register</a>
-                        <a href="{{ route('club-students') }}">Students</a>
-                    @endif
-                @endif
-                <a href="{{ route('settings') }}">Settings</a>
+                @include('sidebar')
             </div>
         </div>
         <div class="col-md-9" style="margin-top: 50px;">
@@ -47,36 +28,45 @@
                     <form class="form-horizontal" method="POST"
                         action="{{ url('rules') }}" enctype="multipart/form-data">
                         @csrf
-                        <p class="font-weight-bold">Colour Scheme</p>
+                        <p class="font-weight-bold">Branding</p>
+                        <div class="col-md-8">
+                            <label for="brand_logo">Logo: </label>
+                            <input type="file" name ="brand_logo" id="brand_logo" url="brand_logo" />
+                        </div>
                         <div class="col-md-8">
                             <label for="brand_colour">Brand Colour: </label>
-                            <input type="color" id="brand_colour" name="brand_colour" value="<?php echo $rules[0]; ?>" onchange="colourScheme()" />
+                            <input type="color" name="brand_colour" id="brand_colour" url="brand_colour" value="<?php echo $rules[0]; ?>" onchange="colourScheme()" />
                         </div>
                         <div class="col-md-8">
                             <label for="brand_colour">Text Colour: </label>
-                            <input type="color" id="text_colour" name="text_colour" value="<?php echo $rules[1]; ?>" onchange="colourScheme()" />
+                            <input type="color" name ="text_colour" id="text_colour" url="text_colour" value="<?php echo $rules[1]; ?>" onchange="colourScheme()" />
                         </div>
                         <p class="font-weight-bold">Booking Rules</p>
                         <div class="col-md-8">
                             <label for="club_start">Club Start Time: </label>
-                            <input type="time" id="club_start" name="club_start" value="<?php echo $rules[2]; ?>"/>
+                            <input type="time" name="club_start" id="club_start" url="club_start" value="<?php echo $rules[2]; ?>"/>
                         </div>
                         <div class="col-md-8">
                             <label for="club_end">Club End Time: </label>
-                            <input type="time" id="club_end" name="club_end" value="<?php echo $rules[3]; ?>"/>
-                        </div>
-                        <div class="col-md-8">
-                            <label for="room_capacity">Room Capacity: </label>
-                            <input type="number" id="room_capacity" name="room_capacity" value="<?php echo $rules[6]; ?>"/>
+                            <input type="time" name="club_end" id="club_end" url="club_end" value="<?php echo $rules[3]; ?>"/>
                         </div>
                         <div class="col-md-8">
                             <label for="club_duration_step">Club Duration Step (minutes): </label>
-                            <input type="number" id="club_duration_step" name="club_duration_step" value="<?php echo $rules[4]; ?>"/>
+                            <input type="number" name="club_duration_step" id="club_duration_step" url="club_duration_step" value="<?php echo $rules[4]; ?>"/>
                         </div>
                         <div class="col-md-8">
-                            <label for="booking_interval">Booking Interval (days): </label>
-                            <input type="number" id="booking_interval" name="booking_interval" value="<?php echo $rules[5]; ?>"/>
+                            <label for="booking_interval">Booking in Advance (days): </label>
+                            <input type="number" name="booking_interval" id="booking_interval" url="booking_interval" value="<?php echo $rules[5]; ?>"/>
                         </div>
+                        <p class="font-weight-bold">Other Club Rules</p>
+                            <div class="row">
+                                <label class="col-md-3" for="booking_interval">Staff to Student Ratio: </label>
+                                <div class="col-md-9">
+                                    <input type="number" value="1" style="width: 50px;"/>
+                                    <span>:</span>
+                                    <input type="number" name="student_ratio" url="student_ratio" value="<?php echo $rules[8]; ?>" style="width: 50px;"/>
+                                </div>
+                            </div>
                         <input id="submit" type="submit" class="btn btn-primary" />
                         <input id="reset" type="reset" class="btn btn-primary" onclick="resetColourScheme()"/>
                     </form>
@@ -85,5 +75,17 @@
         </div>
     </div>
 </div>
-<script src="../js/colourScheme.js"></script>
+<script type="text/javascript">
+    $('#control_panel').addClass('active');
+    function colourScheme() {
+        var element_to_change = ["#navbar", "#navbar", "#card-header", "#control_panel", "#submit", "#reset"];
+        for(var i = 0;i < element_to_change.length;i++) {
+            $(element_to_change[i]).css({"background-color":$("#brand_colour").val(), "color": $("#text_colour").val()});
+        }
+    }
+
+    function resetColourScheme() {
+        location.reload();
+    }
+</script>
 @endsection

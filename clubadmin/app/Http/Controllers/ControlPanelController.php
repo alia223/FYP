@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Gate;
 use App\Models\Rule;
 
 class ControlPanelController extends Controller

@@ -9,7 +9,7 @@
         </div>
         <div class="col-md-9" style="margin-top: 50px;">
             <div class="card">
-                <div class="card-header">Display Booked Students</div>
+                <div class="card-header">Display All Booked Students</div>
                 <div class="card-body">
                     <table class="table table-striped">
                         <thead>
@@ -19,6 +19,9 @@
                                 <th class="text-center">Date of Birth</th>
                                 <th class="text-center">Dietary Requirements</th>
                                 <th class="text-center">Food Arrangement</th>
+                                @if(Gate::denies('clubstaff')) 
+                                <th class="text-center" colspan="3" style="color: black">Action</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -29,6 +32,10 @@
                                 <td class="text-center">{{$child['date_of_birth']}}</td>
                                 <td class="text-center">{{$child['dietary_requirements']}}</td>
                                 <td class="text-center">{{$child['food_arrangement']}}</td>
+                                @if(Gate::denies('clubstaff')) 
+                                <td class="text-center"><a href="{{action('App\Http\Controllers\BookedStudentController@edit', $child['id'])}}" class="btn
+                                btn-warning material-icons" title="Edit Details">build</a></td>
+                                @endif
                             </tr>
                             @endforeach
                         </tbody>
@@ -39,6 +46,6 @@
     </div>
 </div>
 <script type="text/javascript"> 
-    $('#past_bookings').addClass('active'); 
+    $('#bookings').addClass('active'); 
 </script>
 @endsection

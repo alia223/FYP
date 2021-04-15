@@ -34,14 +34,7 @@ class StudentRegisterController extends Controller
             $students = Student::all()->where('parentid',Auth::id());
         }
         else {
-            $roomid = 0;
-            $booked_students = BookedStudent::all();
-            $rooms = Room::all()->where('staffid', Auth::id());
-            foreach($rooms as $room) {
-                $roomid = $room->id;
-                $booked_students = $booked_students->where('roomid', $roomid);
-            }
-            $students = DB::table('students')->join('booked_students', 'students.id', '=', 'booked_students.studentid')->where('roomid', $roomid)->select('students.*')->get();
+            $students = DB::table('students')->join('booked_students', 'students.id', '=', 'booked_students.studentid')->where('booking_date', date('Y-m-d'))->select('students.*')->get();
             $students = json_decode(json_encode($students), true);
         }
         $booked_students = BookedStudent::all();
@@ -101,18 +94,22 @@ class StudentRegisterController extends Controller
         $booking_of_attended_student = 0;
         $booked_students = BookedStudent::all()->where('studentid', $id);
         foreach($booked_students as $booked_student) {
-            $students = Booking::all()->where('id', $booked_student->bookingid)->where('booking_date', '2021-02-08');
+            $students = Booking::all()->where('id', $booked_student->bookingid)->where('booking_date', date('Y-m-d'));
             foreach($students as $student) {
                 $booking_of_attended_student = $student;
             }
         }
-        $students = BookedStudent::all()->where('bookingid', $booking_of_attended_student->id);
+        $students = BookedStudent::all()->where('bookingid', $booking_of_attended_student->id)->where('studentid', $id);
+        error_log($students);
         foreach($students as $student) {
-            if($student->attendance == 0) {
-                $student->attendance = 1;
+            if($student->checked_in == null && $student->checked_out == null) {
+                $student->checked_in = date('H:i:s');
             }
-            else {
-                $student->attendance = 0;
+            else if($student->checked_in != null && $student->checked_out == null) {
+                $student->checked_out = date('H:i:s');
+            }
+            else if($student->checked_in != null && $student->checked_out != null) {
+
             }
             $student->save();
         }
