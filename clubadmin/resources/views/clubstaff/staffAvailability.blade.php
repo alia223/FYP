@@ -49,16 +49,21 @@
                             <tr>
                                 <td>{{ ucwords($days[$i]) }}</td>
                                 <td>
-                                    <input type="time" id="{{ $days[$i] }}_available_from" name="{{ $days[$i] }}_available_from" min="{{$rules[2]}}" max="<?php echo date("H:i", strtotime('-'.$rules[4].'minutes', strtotime($rules[3]))); ?>" value="<?php if(sizeof($staffAvailability) > 0) { echo $staffAvailability->where('day', $i+1)->first()->available_from; } ?>"/>
+                                    <input type="time" id="{{ $days[$i] }}_available_from" name="{{ $days[$i] }}_available_from" min="{{$rules->club_start}}"
+                                    max="<?php echo date("H:i", strtotime('-'.$rules->club_duration.'minutes', strtotime($rules->club_end))); ?>" 
+                                    value="<?php if(sizeof($staffAvailability) > 0) { echo $staffAvailability->where('day', $i+1)->first()->available_from; } ?>"/>
                                 </td>
                                 <td>
-                                    <input type="time" id="{{ $days[$i] }}_available_until" name="{{ $days[$i] }}_available_until" min="<?php echo date("H:i", strtotime('+'.$rules[4].'minutes', strtotime($rules[2]))); ?>" max="{{$rules[3]}}" value="<?php if(sizeof($staffAvailability) > 0) { echo $staffAvailability->where('day', $i+1)->first()->available_until; } ?>"/>
+                                    <input type="time" id="{{ $days[$i] }}_available_until" name="{{ $days[$i] }}_available_until" 
+                                    min="<?php echo date("H:i", strtotime('+'.$rules->club_duration.'minutes', strtotime($rules->club_start))); ?>" 
+                                    max="{{$rules->club_end}}" value="<?php if(sizeof($staffAvailability) > 0) { echo $staffAvailability->where('day', $i+1)->first()->available_until; } ?>"/>
                                 </td>
                             </tr>
                         @endfor
                         <tr>
                             <td>Preferred Hours Per Week</td>
-                            <td><input name="max_hours" style="width:80px;" type="number" min = "0" value="<?php if(sizeof($staffAvailability) > 0) { echo $staffAvailability->where('staffid', Auth::user()->id)->first()->max_hours; } ?>"></td>
+                            <td><input name="max_hours" style="width:80px;" type="number" 
+                            min = "0" value="<?php if(sizeof($staffAvailability) > 0) { echo $staffAvailability->where('staff_id', Auth::user()->id)->first()->max_hours; } ?>"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -73,7 +78,7 @@
     </div>
 </div>
 <script type="text/javascript">
-$('#staff-availability').addClass('active'); 
+$('#staff_availability').addClass('active'); 
 
 </script>
 @endsection

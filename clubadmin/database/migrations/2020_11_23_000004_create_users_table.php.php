@@ -16,7 +16,7 @@ class CreateUsersTable extends Migration
             $table->string('telephone');
             $table->string('mobile');
             $table->datetime('email_verified_at')->nullable();
-            $table->boolean('role')->default(0);
+            $table->boolean('admin')->default(0);
             $table->boolean('clubstaff')->default(0);
             $table->string('password');
             $table->string('remember_token')->nullable();
@@ -32,7 +32,7 @@ class CreateUsersTable extends Migration
                 'email' => 'asfand.y.ali99@gmail.com',
                 'telephone' => '0121 123 4567',
                 'mobile' => '07123456789',
-                'role' => '1',
+                'admin' => '1',
                 'clubstaff' => '0',
                 'password' => Hash::make('Asfand0223')
             )
@@ -46,7 +46,7 @@ class CreateUsersTable extends Migration
                 'email' => 'staffone@gmail.com',
                 'telephone' => '0121 123 4567',
                 'mobile' => '07123456789',
-                'role' => '0',
+                'admin' => '0',
                 'clubstaff' => '1',
                 'password' => Hash::make('Asfand0223')
             )
@@ -59,7 +59,7 @@ class CreateUsersTable extends Migration
                 'email' => 'stafftwo@gmail.com',
                 'telephone' => '0121 123 4567',
                 'mobile' => '07123456789',
-                'role' => '0',
+                'admin' => '0',
                 'clubstaff' => '1',
                 'password' => Hash::make('Asfand0223')
             )
@@ -72,7 +72,7 @@ class CreateUsersTable extends Migration
                 'email' => 'parentone@gmail.com',
                 'telephone' => '0121 123 4567',
                 'mobile' => '07123456789',
-                'role' => '0',
+                'admin' => '0',
                 'clubstaff' => '0',
                 'password' => Hash::make('Asfand0223')
             )
@@ -85,7 +85,7 @@ class CreateUsersTable extends Migration
                 'email' => 'parenttwo@gmail.com',
                 'telephone' => '0121 123 4567',
                 'mobile' => '07123456789',
-                'role' => '0',
+                'admin' => '0',
                 'clubstaff' => '0',
                 'password' => Hash::make('Asfand0223')
             )

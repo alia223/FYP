@@ -26,22 +26,22 @@
             margin: 0;
         }
         .btn {
-            background-color: <?php echo $rules[0]?>; 
-            color: <?php echo $rules[1]?>; 
+            background-color: <?php echo $rules->brand_colour?>; 
+            color: <?php echo $rules->text_colour?>; 
             margin-top:10px;
             border-style: none;
         }
         .card-header {
-            background-color: <?php echo $rules[0]?>;
-            color: <?php echo $rules[1]?>;
+            background-color: <?php echo $rules->brand_colour?>;
+            color: <?php echo $rules->text_colour?>;
         }
         a.active {
-            background-color: <?php echo $rules[0]?>;
-            color: <?php echo $rules[1]?>;
+            background-color: <?php echo $rules->brand_colour?>;
+            color: <?php echo $rules->text_colour?>;
         }
         .btn:hover {
-            background-color: <?php echo $rules[0]?>;
-            color: <?php echo $rules[1]?>;
+            background-color: <?php echo $rules->brand_colour?>;
+            color: <?php echo $rules->text_colour?>;
         }
 
         .sidebar{
@@ -76,10 +76,10 @@
 </head>
 <body>
     <div id="app">
-        <nav id="navbar" class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: <?php echo $rules[0]; ?>; padding: 0;">
+        <nav id="navbar" class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: <?php echo $rules->brand_colour; ?>; padding: 0;">
             <div class="container">
-            <img src="storage/images/<?php echo $rules[7] ?>" height="35px" width="35px" style="margin-right: 10px;"/>
-                <a class="navbar-brand" id="navbar-brand" href="{{ url('home') }}" style="color:<?php echo $rules[1];?>; padding: 0;">
+            <img src="/storage/images/<?php echo $rules->brand_logo ?>" height="35px" width="35px" style="margin-right: 10px;"/>
+                <a class="navbar-brand" id="navbar-brand" href="{{ url('home') }}" style="color:<?php echo $rules->text_colour;?>; padding: 0;">
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -106,7 +106,7 @@
                             @endif
                         @else
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre style="color:<?php echo $rules[1];?>;">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre style="color:<?php echo $rules->text_colour;?>;">
                                     {{ Auth::user()->name }}
                                 </a>
 

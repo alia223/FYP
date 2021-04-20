@@ -55,8 +55,8 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
     $currentD = $currentDate[2];
     $currentM = $currentDate[1];
     $currentY = $currentDate[0];
-    $isToday = $currentD == date('d')+$rules[5] && $currentM == date('m') && $currentY == date('Y');
-    $dayIsGreater_MonthAndYearSame = $currentD > date('d')+$rules[5] && $currentM == date('m') && $currentY == date('Y');
+    $isToday = $currentD == date('d')+$rules->booking_interval && $currentM == date('m') && $currentY == date('Y');
+    $dayIsGreater_MonthAndYearSame = $currentD > date('d')+$rules->booking_interval && $currentM == date('m') && $currentY == date('Y');
     $monthIsGreater_YearIsSame = $currentM > date('m') && $currentY == date('Y');
     $yearIsGreater = $currentY > date('Y');
     $todayOrLater = $isToday || $dayIsGreater_MonthAndYearSame || $monthIsGreater_YearIsSame || $yearIsGreater;
@@ -68,7 +68,7 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
             //if there is atleast 1 booking that exists on this day
             if(sizeof($bookings->where('booking_date', date('Y-m-d', strtotime($date)))) > 0) {
                 //style button using admin rule colours and allow button to take user to a page that shows the bookings that have been made for that day
-                $week .= '<td style="border-width: 3px; border-color:'.$rules[0].'"><a class="btn"';
+                $week .= '<td style="border-width: 3px; border-color:'.$rules->brand_colour.'"><a class="btn"';
                 $week .= 'href="';
                 $week .= url('bookings', date('Y-m-d', strtotime($date)));
             } 
@@ -77,7 +77,8 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
                 //if the user is an admin
                 if(!Gate::denies('admin')) {
                     //apply admin rule colours and direct admin to a page showing all bookings
-                    $week .= '<td style="border-width: 3px; border-color:'.$rules[0].'"><a class="btn" style="border-style: solid; border-color:rgb(0,0,0); background-color: white; color: black;"';
+                    $week .= '<td style="border-width: 3px; border-color:'.$rules->brand_colour.'"><a class="btn" style="border-style: solid; border-color:rgb(0,0,0); 
+                    background-color: white; color: black;"';
                     $week .= 'href="';
                     $week .= url('bookings', date('Y-m-d', strtotime($date)));
                 }
@@ -86,7 +87,8 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
                     //Usually if there are no bookings the user is sent to the creat a booking page
                     //However, this is the admin so they wouldn't be booking sessions using the admin account
                     //Therefore, direct admin page that displays all bookings (i.e. 0 bookings)
-                    $week .= '<td style="border-width: 3px; border-color:'.$rules[0].'"><a class="btn" style="background-color: white; border-style: solid; border-color:rgb(0,0,0); color: black"';
+                    $week .= '<td style="border-width: 3px; border-color:'.$rules->brand_colour.'"><a class="btn" style="background-color: white; border-style: solid; 
+                    border-color:rgb(0,0,0); color: black"';
                     $week .= 'href="';
                     $week .= action('App\Http\Controllers\BookingController@create', ['date' => date('Y-m-d', strtotime($date))]);
                 }
@@ -176,9 +178,19 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
             <div class="col-md-8">
                     <table style="margin: 0 auto;">
                         <tr>
-                            <td><a href="?ym=<?= $prev; ?>" class="btn btn-link" style="color: <?php echo $rules[1];?>; height: 25px; width:25px; padding:0; margin: 0;"><i class="material-icons">arrow_back</i></a></td>
-                            <td><span class="text-center" style="color: <?php echo $rules[0]; ?>"><?= $title; ?></span></td>
-                            <td><a href="?ym=<?= $next; ?>" class="btn btn-link" style="color: <?php echo $rules[1];?>; height: 25px; width:25px; padding:0; margin: 0;"><i class="material-icons">arrow_forward</i></a></td>
+                            <td>
+                                <a href="?ym=<?= $prev; ?>" class="btn btn-link" style="color: <?php echo $rules->text_colour;?>; height: 25px; width:25px; padding:0; margin: 0;">
+                                    <i class="material-icons">arrow_back</i>
+                                </a>
+                            </td>
+                            <td>
+                                <span class="text-center" style="color: <?php echo $rules->brand_colour; ?>"><?= $title; ?></span>
+                            </td>
+                            <td>
+                                <a href="?ym=<?= $next; ?>" class="btn btn-link" style="color: <?php echo $rules->text_colour;?>; height: 25px; width:25px; padding:0; margin: 0;">
+                                    <i class="material-icons">arrow_forward</i>
+                                </a>
+                            </td>
                         </tr>
                     </table>
                 <p><a class="btn" href="{{ url('bookings') }}?ym=<?php echo date('Y-m');?>">Today</a></p>

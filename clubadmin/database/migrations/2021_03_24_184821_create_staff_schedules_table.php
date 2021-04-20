@@ -15,12 +15,12 @@ class CreateStaffSchedulesTable extends Migration
     {
         Schema::create('staff_schedules', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('staffid')->unsigned();
+            $table->bigInteger('staff_id')->unsigned();
             $table->integer('day');
-            $table->string('available_from')->nullable();
-            $table->string('available_until')->nullable();
+            $table->string('working_from')->nullable();
+            $table->string('working_until')->nullable();
             $table->timestamps();
-            $table->foreign('staffid')->references('id')->on('users'); 
+            $table->foreign('staff_id')->references('id')->on('users'); 
         });
     }
 

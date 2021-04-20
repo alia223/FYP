@@ -21,15 +21,16 @@
         <div class="card">
           <div class="card-header">{{ __('Dashboard') }}</div>
             <div class="card-body">
-              <p>Hello {{Auth::user()->name}}, you are logged in!</p>
+              <p>Hello {{ Auth::user()->name }}, you are logged in!</p>
             </div>
         </div>
         @if(Gate::denies('admin') && Gate::denies('clubstaff'))
-                @foreach($students as $student)
+                @foreach($pupils as $pupil)
                 <div class="card" style="margin-top: 10px;">
                 <div style="background-colour: lightgreen;" class="card-header">{{ __('Notification') }}</div>
                   <div class="card-body">
-                    <p style="color: lightgreen;">{{$student->first_name}} {{$student->last_name }} has arrived at the club at {{ $booked_students->where('studentid', $student->id)->first()->checked_in }}!</p>
+                    <p style="color: lightgreen;">{{ $pupil->first_name }} {{ $pupil->last_name }} has arrived at the club at 
+                    {{ $booked_pupils->where('pupil_id', $pupil->id)->first()->checked_in }}!</p>
                   </div>
                 </div>
                 @endforeach

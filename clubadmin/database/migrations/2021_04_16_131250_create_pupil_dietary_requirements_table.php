@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInjuriesTable extends Migration
+class CreatePupilDietaryRequirementsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,12 @@ class CreateInjuriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('injuries', function (Blueprint $table) {
+        Schema::create('pupil_dietary_requirements', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('staff_id')->unsigned();
             $table->bigInteger('pupil_id')->unsigned();
-            $table->date('date');
-            $table->string('description');
+            $table->string('dietary_requirements');
             $table->timestamps();
-            $table->softDeletes();
-            $table->foreign('staff_id')->references('id')->on('users'); 
-            $table->foreign('pupil_id')->references('id')->on('pupils');
+            $table->foreign('pupil_id')->references('id')->on('pupils'); 
         });
     }
 
@@ -33,6 +29,6 @@ class CreateInjuriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('injuries');
+        Schema::dropIfExists('pupil_dietary_requirements');
     }
 }

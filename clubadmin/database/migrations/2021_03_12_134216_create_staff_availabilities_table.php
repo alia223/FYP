@@ -15,7 +15,7 @@ class CreateStaffAvailabilitiesTable extends Migration
     {
         Schema::create('staff_availabilities', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('staffid')->unsigned();
+            $table->bigInteger('staff_id')->unsigned();
             $table->integer('day');
             $table->time('available_from')->nullable();
             $table->time('available_until')->nullable();
@@ -23,7 +23,7 @@ class CreateStaffAvailabilitiesTable extends Migration
             $table->integer('max_hours')->nullable();
             $table->integer('total_duration_worked_this_day')->default(0);
             $table->timestamps();
-            $table->foreign('staffid')->references('id')->on('users'); 
+            $table->foreign('staff_id')->references('id')->on('users'); 
         });
     }
 

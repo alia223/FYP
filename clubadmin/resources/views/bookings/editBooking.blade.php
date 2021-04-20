@@ -25,20 +25,20 @@
                         </div><br />
                     @endif
                 <div class="card-body">
-                    <form class="form-horizontal" id="form" action="{{ action('App\Http\Controllers\BookingController@update', $booking['id']) }}" method="POST" enctype="multipart/form-data" >
+                    <form class="form-horizontal" id="form" action="{{ action('App\Http\Controllers\BookingController@update', $booking->id) }}" method="POST" enctype="multipart/form-data" >
                         @method('PATCH')
                         @csrf
                         <label for="booking_length" class="font-weight-bold">How long would you like your child to attend the club for?</label>
                         <table style="width:60%;">
                         <tr><th></th></tr>
                         <?php 
-                        $termination = (strtotime($rules[3])-strtotime($rules[2]))/60;
-                        for($i = 0;$i <= $termination/intval($rules[4]);$i++) {
+                        $termination = (strtotime($rules->club_end)-strtotime($rules->club_start))/60;
+                        for($i = 0;$i <= $termination/intval($rules->club_duration_step);$i++) {
                             echo '<tr>';
                             for($j = 0; $j < 4; $j++) {
-                                if($i !== $termination/intval($rules[4])) {
+                                if($i !== $termination/intval($rules->club_duration_step)) {
                                     $i++;
-                                    $val = intval($rules[4]) * $i;
+                                    $val = intval($rules->club_duration_step) * $i;
                                     echo '<td><div class="row offset-md-1">';
                                     if($booking->duration == $val) {
                                         echo '<input type="radio" id="'.$val.'" name="booking_length" id="booking_length" value="'.$val.'" checked/>&nbsp&nbsp';
@@ -66,24 +66,24 @@
                         <p class="font-weight-bold">Which children will be attending?</p>
                         <?php    
                             $i = 0;
-                            foreach($students as $student) {
-                                if(sizeof($booked_students->where('studentid', $student['id'])) > 0) {
-                                    echo '<input style="margin-right:10px;" type="checkbox" name="students[]" value="'.$student['id'].'"  checked/>'
-                                .'<label for="students[]">'.$student['first_name'].' '.$student['last_name'].'</label>&nbsp&nbsp';
+                            foreach($pupils as $pupil) {
+                                if(sizeof($booked_pupils->where('pupil_id', $pupil->id)) > 0) {
+                                    echo '<input style="margin-right:10px;" type="checkbox" name="pupils[]" value="'.$pupil->id.'"  checked/>'
+                                .'<label for="pupils[]">'.$pupil->first_name.' '.$pupil->last_name.'</label>&nbsp&nbsp';
                                 }
                                 else {
-                                    echo '<input style="margin-right:10px;" type="checkbox" name="students[]" value="'.$student['id'].'" />'
-                                .'<label for="students[]">'.$student['first_name'].' '.$student['last_name'].'</label>&nbsp&nbsp';
+                                    echo '<input style="margin-right:10px;" type="checkbox" name="pupils[]" value="'.$pupil->id.'" />'
+                                .'<label for="pupils[]">'.$pupil->first_name.' '.$pupil->last_name.'</label>&nbsp&nbsp';
                                 }
                                 $i++;
                             }
                             if(!Gate::denies('admin')) {
-                                if(sizeof($booked_students) == 0) {
+                                if(sizeof($booked_pupils) == 0) {
                                     echo '<p style="color: red">No children were selected</p>';
                                 }
                             }
                         ?><br />
-                        @if(sizeof($bookings->where('eventid', $booking['eventid'])) > 1)
+                        @if(sizeof($bookings->where('event_id', $booking->event_id)) > 1)
                             <label for="repeat_apply" class="font-weight-bold">This is a repeat booking. <br />Tick the box below if you would like to make this change to all of the other bookings too.</label><br />
                             <input type="checkbox" id="repeat_apply" /><br />
                         @endif
@@ -100,10 +100,10 @@
     $('#bookings').addClass('active'); 
     $('#repeat_apply').change(function() {
         if($('#repeat_apply').is(":checked")) {
-            $('#form').attr('action', "{{ action('App\Http\Controllers\RepeatBookingController@update', $booking['id']) }}");
+            $('#form').attr('action', "{{ action('App\Http\Controllers\RepeatBookingController@update', $booking->id) }}");
         }
         else {
-            $('#form').attr('action', "{{ action('App\Http\Controllers\BookingController@update', $booking['id']) }}");
+            $('#form').attr('action', "{{ action('App\Http\Controllers\BookingController@update', $booking->id) }}");
         }
     });
 </script>

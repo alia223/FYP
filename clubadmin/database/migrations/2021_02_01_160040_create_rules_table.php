@@ -22,7 +22,7 @@ class CreateRulesTable extends Migration
             $table->string('club_end');
             $table->integer('club_duration_step');
             $table->integer('booking_interval');
-            $table->integer('student_ratio');
+            $table->integer('pupil_ratio');
             $table->timestamps();
         });
 
@@ -36,7 +36,7 @@ class CreateRulesTable extends Migration
                 'club_end' => '19:30:00',
                 'club_duration_step' => '30',
                 'booking_interval' => '0',
-                'student_ratio' => '6'
+                'pupil_ratio' => '6'
             )
         );
     }

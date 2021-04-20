@@ -13,7 +13,19 @@
                     <!-- display the errors -->
                     @if ($errors->any())
                         <div class="alert alert-danger">
-                            <ul> @foreach ($errors->all() as $error)<li>{{ $error }}</li> @endforeach</ul>
+                            <ul> 
+                                <?php $count = 0; ?>
+                                @foreach ($errors->all() as $error)
+                                <li>
+                                    @if($count < sizeof($errors) - 1)
+                                        {{ $pupils->where('id', $error)->first()->first_name }} is already booked in on: 
+                                    @else 
+                                        {{$error}}
+                                    @endif 
+                                    <?php $count++; ?>
+                                </li> 
+                                @endforeach
+                            </ul>
                         </div><br /> 
                     @endif
                     <!-- display the success status -->
@@ -24,21 +36,21 @@
                     @endif
                     <!-- define the form -->
                     <div class="card-body">
-                        <p class="text-center font-weight-bold" style="color: red;">Club runs from {{ $rules[2] }} to {{ $rules[3] }}</p>
-                        <form id="booking-form" action="{{ url('bookings') }}" class="form-horizontal" method="POST" enctype="multipart/form-data">
+                        <p class="text-center font-weight-bold" style="color: red;">Club runs from {{ $rules->club_start }} to {{ $rules->club_end }}</p>
+                        <form id="booking_form" action="{{ url('bookings') }}" class="form-horizontal" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="col-md-12">
                             <label for="booking_length" class="font-weight-bold">How long would you like your child to attend the club for? <span class="red-star">*</span></label>
                             <table style="width:60%;">
                             <tr><th></th></tr>
                             <?php 
-                            $termination = (strtotime($rules[3])-strtotime($rules[2]))/60;
-                            for($i = 0;$i <= $termination/intval($rules[4]);$i++) {
+                            $termination = (strtotime($rules->club_end)-strtotime($rules->club_start))/60;
+                            for($i = 0;$i <= $termination/intval($rules->club_duration_step);$i++) {
                                 echo '<tr>';
                                 for($j = 0; $j < 4; $j++) {
-                                    if($i !== $termination/intval($rules[4])) {
+                                    if($i !== $termination/intval($rules->club_duration_step)) {
                                         $i++;
-                                        $val = intval($rules[4]) * $i;
+                                        $val = intval($rules->club_duration_step) * $i;
                                         echo '<td><div class="row offset-md-1">';
                                         echo '<input type="radio" id="'.$val.'" name="booking_length" id="booking_length" value="'.$val.'"/>&nbsp&nbsp';
                                         echo '<label for="'.$val.'">';
@@ -62,13 +74,13 @@
                         <div class="col-md-12">
                             <p class="font-weight-bold">Which children will be attending? <span class="red-star">*</span></p>
                             <?php    
-                                if(sizeof($students) == 0) {
-                                    echo '<a href="'.action('App\Http\Controllers\StudentController@index').'">Add a child</a>';
+                                if(sizeof($pupils) == 0) {
+                                    echo '<a href="'.action('App\Http\Controllers\PupilController@index').'">Add a child</a>';
                                 }
                                 else {
-                                    foreach($students as $student) {
-                                        echo '<input style="margin-right:10px;" type="checkbox" name="students[]" value="'.$student['id'].'" />'
-                                        .'<label for="students[]">'.$student['first_name'].' '.$student['last_name'].'</label>&nbsp&nbsp';
+                                    foreach($pupils as $pupil) {
+                                        echo '<input style="margin-right:10px;" type="checkbox" name="pupils[]" value="'.$pupil->id.'" />'
+                                        .'<label for="pupils[]">'.$pupil->first_name.' '.$pupil->last_name.'</label>&nbsp&nbsp';
                                     }
                                 }
                             ?>
@@ -114,12 +126,11 @@
         if($('#repeat_booking').is(":checked")) {
             $('#recursive_end_date').show();
             $('#recursive_days').show();
-            $('#booking-form').attr('action', "{{ url('repeat-bookings') }}");
-        }
-        else {
+            $('#booking_form').attr('action', "{{ url('repeat-bookings') }}");
+        } else {
             $('#recursive_end_date').hide();
             $('#recursive_days').hide();
-            $('#booking-form').attr('action', "{{ url('bookings') }}");
+            $('#booking_form').attr('action', "{{ url('bookings') }}");
         }
     });
 

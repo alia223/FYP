@@ -33,10 +33,10 @@
                             <tbody>
                                 @foreach($activities as $activity)
                                 <tr>
-                                    <td class="text-center">{{$activity['action']}}</td>
-                                    <td  class="text-center">{{$activity['booking_id']}}</td>
-                                    <td  class="text-center">{{$activity['userid']}}</td>
-                                    <td  class="text-center">{{$activity['created_at']}}</td>
+                                    <td class="text-center">{{ $activity->action }}</td>
+                                    <td  class="text-center">{{ $activity->booking_id }}</td>
+                                    <td  class="text-center">{{ $activity->user_id }}</td>
+                                    <td  class="text-center">{{ $activity->created_at }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>

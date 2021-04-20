@@ -22,28 +22,28 @@
             <div class="card-header">Settings</div>
                 <div class="card-body">
                 @foreach($user as $u)
-                    <form class="form-horizontal" method="POST" action="{{ action('App\Http\Controllers\SettingsController@update', $u['id']) }} " enctype="multipart/form-data" >
+                    <form class="form-horizontal" method="POST" action="{{ action('App\Http\Controllers\SettingsController@update', $u->id) }} " enctype="multipart/form-data" >
                         @method('PATCH')
                         @csrf
                         <div class="col-md-8">
                             <label >First Name: </label>
-                            <input type="text" name="user_first_name" value="{{$u->name}}"/>
+                            <input type="text" name="user_first_name" value="{{ $u->name }}"/>
                         </div>
                         <div class="col-md-8">
                             <label >Last Name: </label>
-                            <input type="text" name="user_last_name" value="{{$u->last_name}}"/>
+                            <input type="text" name="user_last_name" value="{{ $u->last_name }}"/>
                         </div>
                         <div class="col-md-8">
                             <label>Email: </label>
-                            <input type="text" name="user_email" value="{{$u->email}}" />
+                            <input type="text" name="user_email" value="{{ $u->email }}" />
                         </div>
                         <div class="col-md-8">
                             <label>Telephone: </label>
-                            <input type="text" name="user_telephone" value="{{$u->telephone}}" />
+                            <input type="text" name="user_telephone" value="{{ $u->telephone }}" />
                         </div>
                         <div class="col-md-8">
                             <label>Mobile: </label>
-                            <input type="text" name="user_mobile" value="{{$u->mobile}}" />
+                            <input type="text" name="user_mobile" value="{{ $u->mobile }}" />
                         </div>
                         <div class="col-md-6 col-md-offset-4">
                             <input type="submit" class="btn btn-primary" value="Save Changes"/>

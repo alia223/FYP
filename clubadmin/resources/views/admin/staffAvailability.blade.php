@@ -46,7 +46,7 @@
                                 <td>{{$dotw[0]}}<br />Monday</td>
                                 <td>
                                     @foreach($staffAvailability->where('day', 1)->where('available_until', '!=', 0) as $sa)
-                                        {{ $staff->where('id', $sa->staffid)->first()->name }} {{ $staff->where('id', $sa->staffid)->first()->last_name }}: <?php echo $rules[2] ?> - {{ $sa->available_until }} <br />
+                                        {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
                                     @endforeach
                                 </td>
                                 <td>            
@@ -61,7 +61,7 @@
                                 <td>{{$dotw[1]}}<br />Tuesday</td>
                                 <td>
                                     @foreach($staffAvailability->where('day', 2)->where('available_until', '!=', 0) as $sa)
-                                        {{ $staff->where('id', $sa->staffid)->first()->name }} {{ $staff->where('id', $sa->staffid)->first()->last_name }}: <?php echo $rules[2] ?> - {{ $sa->available_until }} <br />
+                                        {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
                                     @endforeach
                                 </td>
                                 <td>            
@@ -76,7 +76,7 @@
                                 <td>{{$dotw[2]}}<br />Wednesday</td>
                                 <td>
                                 @foreach($staffAvailability->where('day', 3)->where('available_until', '!=', 0) as $sa)
-                                        {{ $staff->where('id', $sa->staffid)->first()->name }} {{ $staff->where('id', $sa->staffid)->first()->last_name }}: <?php echo $rules[2] ?> - {{ $sa->available_until }} <br />
+                                        {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
                                     @endforeach
                                 </td>
                                 <td>            
@@ -91,7 +91,7 @@
                                 <td>{{$dotw[3]}}<br />Thursday</td>
                                 <td>
                                 @foreach($staffAvailability->where('day', 4)->where('available_until', '!=', 0) as $sa)
-                                        {{ $staff->where('id', $sa->staffid)->first()->name }} {{ $staff->where('id', $sa->staffid)->first()->last_name }}: <?php echo $rules[2] ?> - {{ $sa->available_until }} <br />
+                                        {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
                                     @endforeach
                                 </td>
                                 <td>            
@@ -106,7 +106,7 @@
                                 <td>{{$dotw[4]}}<br />Friday</td>
                                 <td>
                                 @foreach($staffAvailability->where('day', 5)->where('available_until', '!=', 0) as $sa)
-                                        {{ $staff->where('id', $sa->staffid)->first()->name }} {{ $staff->where('id', $sa->staffid)->first()->last_name }}: <?php echo $rules[2] ?> - {{ $sa->available_until }} <br />
+                                        {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
                                     @endforeach
                                 </td>
                                 <td>            
@@ -125,7 +125,7 @@
     </div>
 </div>
 <script type="text/javascript">
-  $('#staff-availability').addClass('active'); 
+  $('#staff_availability').addClass('active'); 
 </script>
 @endsection
 </body>
