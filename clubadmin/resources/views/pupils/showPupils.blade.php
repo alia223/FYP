@@ -12,18 +12,19 @@
 @section('content')
 <div class="container" style="margin:0; padding:0;">
     <div class="row justify-content-center">
-        <div class="col-md-3">
-            <div class="sidebar">
-                @include('sidebar')            
-            </div>
-        </div>
-        <div class="col-md-9" style="margin-top: 50px;">
+        @include('sidebar')
+        <div class="offset-md-1 col-md-9" style="margin-top:50px;">
             <div class="card">
             @if(Gate::denies('clubstaff'))
                 <div class="card-header">Children</div>
             @else
                 <div class="card-header">Pupils</div>
             @endif
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
                 <div class="card-body">
                     <table class="table table-striped">
                         <thead>
@@ -31,7 +32,6 @@
                                 <th class="text-center">First Name</th>
                                 <th class="text-center">Last Name</th>
                                 <th class="text-center">Date of Birth</th>
-                                <th class="text-center">Dietary Requirements</th>
                                 <th class="text-center">Food Arrangement</th>
                                 <th class="text-center" colspan="4" style="color: black">Action</th>
                             </tr>
@@ -41,13 +41,12 @@
                             <tr>
                                 <td class="text-center">{{ $pupil->first_name }}</td>
                                 <td class="text-center">{{ $pupil->last_name }}</td>
-                                <td class="text-center">{{ $pupil->date_of_birth }}</td>
-                                @if($pupil['dietary_requirements'] == "Other")
-                                    <td class="text-center">{{$pupil->other_dietary_requirements }}</td>
-                                @else
-                                    <td class="text-center">{{$pupil->dietary_requirements }}</td>
-                                @endif
+                                <td class="text-center">{{ $pupil->date_of_birth }}</td>                              
                                 <td class="text-center">{{ $pupil->food_arrangement }}</td>
+                                <td class="text-center"><a href="{{ action('App\Http\Controllers\PupilDietaryRequirementController@show', $pupil->id) }}" class="btn
+                                btn-warning custom-buttons" title="Dietary Requirements"><i class="material-icons">lunch_dining</i></a></td>
+                                <td><a href="{{ action('App\Http\Controllers\PupilInjuryController@show', $pupil->id) }}" class="btn
+                                btn-warning custom-buttons" title="Injury Record"><i class="material-icons">error</i></a></td>
                                 @if(Gate::denies('clubstaff'))
                                 <td class="text-center"><a href="{{ action('App\Http\Controllers\PupilController@edit', $pupil->id) }}" class="btn
                                 btn-warning custom-buttons" title="Edit Details"><i class="material-icons">build</i></a></td>
@@ -59,14 +58,11 @@
                                     </form>
                                 </td>
                                 @endif
-                                <td>
-                                <a href="{{ action('App\Http\Controllers\PupilInjuryController@show', $pupil->id) }}" class="btn
-                                btn-warning custom-buttons" title="Injury Record"><i class="material-icons">error</i></a></td>
-                                <td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    {{ $pupils->links() }}
                 </div>
             </div>
             @if(Gate::denies('clubstaff'))
@@ -76,7 +72,9 @@
     </div>
 </div>
 <script type="text/javascript"> 
-    $('#pupils').addClass('active'); 
+    $('#pupils').addClass('active');
+    $('#registered_club_pupils').addClass('active'); 
+    $('#admin_bookings').addClass('active');
 </script>
 @endsection
 </body>

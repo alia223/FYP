@@ -67,8 +67,8 @@ class CreateUsersTable extends Migration
 
         DB::table('users')->insert(
             array(
-                'name' => 'Parent',
-                'last_name' => 'One',
+                'name' => 'Symphony',
+                'last_name' => 'Octavia',
                 'email' => 'parentone@gmail.com',
                 'telephone' => '0121 123 4567',
                 'mobile' => '07123456789',
@@ -80,8 +80,8 @@ class CreateUsersTable extends Migration
 
         DB::table('users')->insert(
             array(
-                'name' => 'Parent',
-                'last_name' => 'Two',
+                'name' => 'Kashton',
+                'last_name' => 'Regina',
                 'email' => 'parenttwo@gmail.com',
                 'telephone' => '0121 123 4567',
                 'mobile' => '07123456789',

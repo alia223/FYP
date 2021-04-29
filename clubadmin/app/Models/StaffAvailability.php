@@ -9,6 +9,11 @@ class StaffAvailability extends Model
 {
     use HasFactory;
 
+    /**
+    * The attributes that are mass assignable.
+    *
+    * @var array
+    */
     protected $fillable = [
         'monday_available_from', 
         'monday_available_until', 

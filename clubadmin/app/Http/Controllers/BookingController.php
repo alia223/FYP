@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 use App\Models\Booking;
-use App\Models\Student;
+use App\Models\Pupil;
 use App\Models\User;
-use App\Models\BookedStudent;
+use App\Models\BookedPupil;
 use App\Models\ClashedBooking;
-use App\Models\ClashedStudent;
+use App\Models\ClashedPupil;
 use App\Models\ActivityLog;
 use App\Models\Rule;
 use Illuminate\Http\Request;
@@ -35,12 +35,15 @@ class BookingController extends Controller
      */
     public function index()
     {
-        $rules = Rule::all();
-        $bookings = Booking::all();
+        //Get all bookings that belong to the logged in parent requesting the resource
+        $bookings = Booking::withTrashed()->get();
         if(Gate::denies('admin') && Gate::denies('clubstaff')) {
-            $bookings = $bookings->where('userid', Auth::id());
+            $bookings = Booking::all()->where('parent_id', Auth::id());
         }
-        return view('bookings.booking', compact('bookings', 'rules'));
+        else {
+            $bookings = Booking::all();
+        }
+        return view('bookings.booking', compact('bookings'));
     }
     
     /**
@@ -49,11 +52,15 @@ class BookingController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request)
-    {
+    {   
+        $this->validate(request(), [
+            'date' => 'required|string'
+        ]);
+        //Get the date that the parent wants to make a booking, and redirect parent to "create a booking" page with an array of their children
+        //so they can select which children to book in
         $date = $request->input('date');
-        $students = Student::all();
-        $students = $students->where('parentid', Auth::id());
-        return view('bookings.createBooking', compact('students'))->with('date', $date);
+        $pupils = Pupil::all()->where('parent_id', Auth::id());
+        return view('bookings.createBooking', compact('pupils'))->with('date', $date);
     }
 
     /**
@@ -68,95 +75,49 @@ class BookingController extends Controller
         $booking = $this->validate(request(), [
             'booking_length' => 'required|string',
             'date' => 'required|string',
-            'students' => 'required|array'
+            'pupils' => 'required|array'
         ],
         [
             'booking_length.required' => 'Please select the duration of your booking.',
-            'students.required' => 'Please select at least one child'
+            'pupils.required' => 'Please select at least one child'
         ]);
-        // create a Booking object and set its values from the input
-        $rules = Rule::all();
-        $club_start_time = "";
-        foreach($rules as $rule) {
-            $club_start_time = $rule->club_start;
+        $club_start_time = Rule::all()->first()->club_start;
+        $club_end_time = Rule::all()->first()->club_end;
+        $booking_duration = $request->input('booking_length');
+        $booking_end_time = date("H:i:s", strtotime("+$booking_duration minutes", strtotime($club_start_time)));
+        if($booking_end_time > $club_end_time) {
+            return back()->withErrors(['errors' => ['Booking duration exceeds limit. Please select one of the options displayed below.']]);
         }
-        //calculate eventid for this set of repeat bookings
-        $event = Booking::orderBy('created_at', 'desc')->first();
-        $eventid = 1;
-        if(!empty($event)) {
-            $eventid = $event->eventid + 1;
-        }
+        $booking_date = date('Y-m-d', strtotime($request->input('date')));
+        //pupils associated with this booking
+        $pupils_associated_with_booking = $request->input('pupils');
+        //either set event_id to 1 as there are no previously existing events, or find the last eventid used for a booking and increment by 1
+        $event_id = !empty(Booking::withTrashed()->orderBy('created_at', 'desc')->first()) ? Booking::withTrashed()->orderBy('created_at', 'desc')->first()->event_id + 1 : 1;
         //store booking details based on inputs
         $booking = new Booking;
-        $booking->userid = Auth::id();
-        $booking->name = Auth::user()->name;
-        $duration = $request->input('booking_length');
-        $booking_length = "+".$duration." minutes";
+        //each booking has an event id, this is mainly useful for when a repeat booking is made so that those bookings are linked together
+        $booking->event_id = $event_id;
+        $booking->parent_id = Auth::id();
         $booking->start_time = $club_start_time;
-        //calculate end time by using values of start time and duration selected by customer
-        $booking->end_time = date("H:i:s", strtotime($booking_length, strtotime($club_start_time)));
-        $booking->duration = $duration;
-        //store date of booking in yyyy-mm-dd format
-        $date = date('Y-m-d', strtotime($request->input('date')));
-        $booking->booking_date = $date;
-        $booking->booking_day = date('w', strtotime($request->input('date')));
-        $booking->eventid = $eventid;
+        $booking_end_time = $booking_end_time;
+        $booking->end_time = $booking_end_time;
+        $booking->duration = $booking_duration;
+        $booking->booking_date = $booking_date;
+        $booking->booking_day = date('w', strtotime($booking_date));
         //before saving the booking, get all bookings by all customers
-        $bookings = Booking::all()->where('booking_date', $date);
-        //array that contains id's of already booked students that are saved in database
-        $booked_student_ids = array();
-        //check to see if booking is valid
-        foreach($bookings as $b) {
-            //loop through all booked students for this particular parent, and add the id's of the students to array
-            $booked_students = BookedStudent::all()->where('parentid', Auth::id())->where('booking_date', $date);
-            foreach($booked_students as $booked_student) {
-                array_push($booked_student_ids, $booked_student->studentid);
-            }
-            //whilst looping through all bookings, if parent is making a booking on a day where they have already made a booking
-            //a check needs to be done to ensure that they are not make the booking on the same day for a child already booked in
-            //same day booking, different child(ren) is totally fine
-            if($booking->booking_date == $b->booking_date) {
-                //get student(s) associated with booking that the parent is trying to make 
-                $students = $request->input('students');
-                //loop through students
-                foreach($students as $student) {
-                    //check if id of this/these student(s) in id array
-                    //if so, this means aprent has already made a booking for this child on this day so return error message to user
-                    if(in_array($student, $booked_student_ids)) {
-                        return back()->withErrors(['errors' => ['Booking unsuccessful as it clashes with the following booking:', Student::find($student)->first_name.' '.Student::find($student)->last_name.' on '.$b->booking_date.' at '.$b->start_time.' - '.$b->end_time]]);
-                    }
-                }
+        $bookings_to_check = Booking::all()->where('parent_id', Auth::id())->where('booking_date', $booking_date);
+        $pupils_already_booked_in = BookedPupil::all()->where('booking_id','!=',$booking->id)->where('parent_id', $booking->parent_id)->where('booking_date', $booking->booking_date)->pluck('pupil_id')->toArray();
+        foreach($request->input('pupils') as $pupil) {
+            if(in_array($pupil, $pupils_already_booked_in)) {
+                $pupil_already_booked_in = Pupil::where('id', $pupil)->first();
+                return back()->withErrors(['errors' => ["$pupil_already_booked_in->first_name $pupil_already_booked_in->last_name"]]);
             }
         }
         $booking->save();
-        //students associated with this booking
-        $students = $request->input('students');
-        //as long as there are actually students selected
-        if(!empty($students)) {
-            //loop through students and create a new booking for that student
-            foreach($students as $student) {
-                $booked_students = new BookedStudent;
-                $booked_students->parentid = Auth::id();
-                $booked_students->bookingid = $booking->id;
-                $booked_students->studentid = $student;
-                $booked_students->booking_date = $date;
-                $booked_students->booking_day = date('w', strtotime($request->input('date')));
-                $booked_students->start_time = $booking->start_time;
-                $booked_students->end_time = $booking->end_time;
-                $booked_students->eventid = $eventid;
-                $booked_students->save();
-            }
-        }
-        
-        //activity log info
-        $activity = new ActivityLog;
-        $activity->action = "Created a booking";
-        $activity->bookingid = $booking->id;
-        $activity->userid = Auth::id();
-        $activity->user = Auth::user()->name;
-        $activity->save();
+        $this->store_pupils_associated_with_booking($booking, $pupils_associated_with_booking, Auth::id());
+        $this->log_activity($booking->id, "Created a booking");
         // generate a redirect HTTP response with a success message
-        return redirect('bookings')->with('success', 'Booking has been added');
+        return redirect('bookings/'.$booking_date)->withSuccess('Booking created successfully!');
     }
 
     /**
@@ -167,11 +128,19 @@ class BookingController extends Controller
      */
     public function show($date)
     {
-        $bookings = Booking::all()->where('booking_date', $date);
+        //parent has clicked on a date on the calendar, so show bookings that belong to only that parent, on that date
+        //or if it is the admin/cklubstaff clicking on a date on the calendar, 
+        //then show all bookings on that regardless of who the booking belongs to 
+        $bookings = Booking::withTrashed()->where('booking_date', $date)->get();
         if(Gate::denies('admin') && Gate::denies('clubstaff')) {
-            $bookings = $bookings->where('userid', Auth::id());
+            $bookings = Booking::all()->where('parent_id', Auth::id())->where('booking_date', $date);
         }
-        return view('bookings.showBookings', compact('bookings'))->with('date', $date);
+        else {
+            $bookings = Booking::withTrashed()->where('booking_date', $date)->get();
+        }
+        $booked_pupils = BookedPupil::withTrashed()->get();
+        $pupils = Pupil::all();
+        return view('bookings.showBookings', compact('bookings', 'booked_pupils', 'pupils'))->with('date', $date);
     }
 
     /**
@@ -182,24 +151,20 @@ class BookingController extends Controller
      */
     public function edit($id)
     {
-        //
+        //Find booking that is being requested to be edited
         $booking = Booking::find($id);
-        $booked_students = BookedStudent::all()->where('bookingid', $id);
+        $booked_pupils = BookedPupil::all()->where('booking_id', $id);
         if(Gate::denies('admin')) {
-            $students = Student::all()->where('parentid', Auth::id());
+            $pupils = Pupil::all()->where('parent_id', Auth::id());
         }
         else {
-            $parentid = 0;
-            foreach($booked_students as $booked_student) {
-                $parents = User::all()->where('id', $booked_student->parentid);
-                foreach($parents as $parent) {
-                    $parentid = $parent->id;
-                }
-            }
-            $students = Student::all()->where('parentid', $parentid);
+            //Admin is requesting to edit a booking so cannot use Auth::id() to get parent id
+            //Instead, find the parent associated with that booking by searching database
+            $parent_id = User::all()->where('id', $booking->parent_id)->first()->id;
+            $pupils = Pupil::all()->where('parent_id', $parent_id);
         }
         $bookings = Booking::all();
-        return view('bookings.editBooking',compact('booking', 'students','booked_students', 'bookings'));
+        return view('bookings.editBooking',compact('booking', 'pupils','booked_pupils', 'bookings'));
     }
 
     /**
@@ -211,102 +176,47 @@ class BookingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
         $this->validate(request(), [
             'booking_length' => 'required|string',
-            'students' => 'required|array'
+            'pupils' => 'required|array'
         ]);
-        $rules = Rule::all();
-        $club_start_time = "";
-        foreach($rules as $rule) {
-            $club_start_time = $rule->club_start;
+        $club_start_time = Rule::all()->first()->club_start;
+        $club_end_time = Rule::all()->first()->club_end;
+        $booking_duration = $request->input('booking_length');
+        $booking_end_time = date("H:i:s", strtotime("+$booking_duration minutes", strtotime($club_start_time)));
+        if($booking_end_time > $club_end_time) {
+            return back()->withErrors(['errors' => ['Booking duration exceeds limit. Please select one of the options displayed below.']]);
         }
+        //get pupils that user has selected
+        $pupils_associated_with_booking = $request->input('pupils');
         //find booking which user is requesting to update
         $booking = Booking::find($id);
         //update booking with new info
-        $duration = $request->input('booking_length');
-        $booking_length = "+".$duration." minutes";
-        $booking->start_time = date('H:i:s', strtotime($club_start_time));
-        $booking->end_time = date("H:i:s", strtotime($booking_length, strtotime($club_start_time)));
-        $booking->duration = $duration;
+        $booking->start_time = $club_start_time;
+        $booking->end_time = $booking_end_time;
+        $booking->duration = $booking_duration;
         $booking->booking_date = $booking->booking_date;
-        $booking->booking_day = date('w', strtotime($request->input('date')));
-        $booking->eventid = $booking->eventid;
+        $booking->booking_day = $booking->booking_day;
+        $booking->event_id = $booking->event_id;
         //besides the booking itself, get all other bookings
-        $bookings = Booking::all()->where('id','!=',$id)->where('userid', $booking['userid']);
-        $booked_student_ids = array();
-        //check to see if booking is valid
-        foreach($bookings as $b) {
-            //get all bookings that this parent has made, except booking being updated
-            //reason for this is because I am going to be chcecking to make sure that the booking with the new information isn't already an existing booking
-            //However, if I include the updated booking too then I will be comparing the updated booking WITH the updated booking and so of course this updated booking will seemingly exist
-            //therefore, compared this updated booking to all other bookings except itself (obviously)
-            $booked_students = BookedStudent::all()->where('bookingid','!=',$id)->where('parentid', $booking['userid'])->where('booking_date', $booking->booking_date);
-            foreach($booked_students as $booked_student) {
-                //store ids of students that are already booked
-                array_push($booked_student_ids, $booked_student->studentid);
-            }
-            //if the newly updated info means that the booking is another the same date as another booking with the same students selected
-            //this is a clash and so inform user of this
-            if($booking->booking_date == $b->booking_date) {
-                $students = $request->input('students');
-                foreach($students as $student) {
-                    if(in_array($student, $booked_student_ids)) {
-                        return back()->withErrors(['errors' => ['Booking unsuccessful as it clashes with the following booking:', Student::find($student)->first_name.' '.Student::find($student)->last_name.' on '.$b->booking_date.' at '.$b->start_time.' - '.$b->end_time]]);
-                    }
-                }
-            }
+        $bookings_to_check = Booking::all()->where('id','!=',$id)->where('parent_id', $booking->parent_id);
+        $pupils_already_booked_in = BookedPupil::all()->where('booking_id','!=',$booking->id)->where('parent_id', $booking->parent_id)->where('booking_date', $booking->booking_date)->pluck('pupil_id')->toArray();
+        if(sizeof($pupils_already_booked_in) > 0) {
+            return back()->withErrors(
+                ['errors' => [implode(",",$pupils_already_booked_in), $booking->booking_date]
+            ]);
         }
         $booking->save();
-        //Check is complete so just update booked students related to this booking by clearing whatever choice is already stored in db
-        //and replacing students with newly selected(and checked) students
-        $booked_students = BookedStudent::withTrashed()->where('bookingid', $id)->get();
-        //rather than using Auth::id, because admin can also update booked students and thus admin will use the id associated with Auth::id 
-        //Auth::id woudnt give the correct booked students as admin doesn't have booked students
-        //instead use the booking id that is stored in the buttons value
-        //when user clicks edit booking button, id is sent to controller,
-        //find any booked student and just get the parentid associated with that booked student
-        //now admin can use parents id without needing Auth::id()
-        $parentid = 0;
-        foreach($booked_students as $booked_student) {
-            $parents = User::all()->where('id', $booked_student->parentid);
-            foreach($parents as $parent) {
-                $parentid = $parent->id;
-            }
+        //Check is complete so just update booked pupils related to this booking by clearing whatever choice is already stored in db
+        //and replacing pupils with newly selected(and checked) pupils
+        $booked_pupils = BookedPupil::withTrashed()->where('booking_id', $id)->get();
+        //delete pupils already associated with booking, ready to replace with newly selected pupils
+        foreach($booked_pupils as $booked_pupil) {
+            $booked_pupil->forceDelete();
         }
-        foreach($booked_students as $booked_student) {
-            //delete the booked student record
-            $booked_student->forceDelete();
-        }
-        //get booked students that user is selecting
-        $students = $request->input('students');
-        //save new booked student records as long as parent has actually seleceted atleast one student
-        if(!empty($students)) {
-            foreach($students as $student) {
-                $booked_students = new BookedStudent;
-                if(!Gate::denies('admin')) {
-                    $booked_students->parentid = $parentid;
-                }
-                else {
-                    $booked_students->parentid = Auth::id();
-                }
-                $booked_students->bookingid = $booking->id;
-                $booked_students->studentid = $student;
-                $booked_students->booking_date = $booking->booking_date;
-                $booked_students->booking_day = date('w', strtotime($request->input('date')));
-                $booked_students->start_time = $booking->start_time;
-                $booked_students->end_time = $booking->end_time;
-                $booked_students->eventid = $booking->eventid;
-                $booked_students->save();
-            }
-        }
-        $activity = new ActivityLog;
-        $activity->bookingid = $id;
-        $activity->action = "Updated a booking";
-        $activity->userid = Auth::id();
-        $activity->user = Auth::user()->name;
-        $activity->save();
-        return redirect('bookings')->with('success','Booking has been updated');
+        $this->store_pupils_associated_with_booking($booking, $pupils_associated_with_booking);
+        $this->log_activity($id, "Updated a booking");
+        return redirect('bookings/'.$booking->booking_date)->withSuccess('Booking updated successfully!');
     }
 
     /**
@@ -317,23 +227,47 @@ class BookingController extends Controller
      */
     public function destroy($id)
     {
-        //First, delete students associate with booking due to foregin key constraints
-        $booked_students = BookedStudent::all();
-        $booked_students = $booked_students->where('bookingid', $id);
-        foreach($booked_students as $booked_student) {
-            $booked_student->delete();
+        //First, delete pupils associate with booking due to foregin key constraints
+        $booked_pupils = BookedPupil::withTrashed()->where('booking_id', $id)->get();
+        foreach($booked_pupils as $booked_pupil) {
+            $booked_pupil->delete();
+            if(!Gate::denies('admin')) {
+                $booked_pupil->forceDelete();
+            }
         }
-        $booking = Booking::find($id);
+        $booking = Booking::withTrashed()->where('id', $id)->first();
+        $booking_date = $booking->booking_date;
         $booking->delete();
+        if(!Gate::denies('admin')) {
+            $booking->forceDelete();
+        }
+        return redirect('bookings/'.$booking_date)->withSuccess('Booking cancelled successfully!');
+    }
 
+    public function store_pupils_associated_with_booking($booking, $pupils_associated_with_booking) {
+        //save new booked pupil records as long as parent has actually seleceted atleast one pupil
+        if(!empty($pupils_associated_with_booking)) {
+            foreach($pupils_associated_with_booking as $pupil) {
+                $booked_pupil = new BookedPupil;
+                $booked_pupil->parent_id = $booking->parent_id;
+                $booked_pupil->booking_id = $booking->id;
+                $booked_pupil->pupil_id = $pupil;
+                $booked_pupil->booking_date = $booking->booking_date;
+                $booked_pupil->booking_day = $booking->booking_day;
+                $booked_pupil->start_time = $booking->start_time;
+                $booked_pupil->end_time = $booking->end_time;
+                $booked_pupil->event_id = $booking->event_id;
+                $booked_pupil->save();
+            }
+        }
+    }
 
+    public function log_activity($id, $message) {
         $activity = new ActivityLog;
-        $activity->action = "Deleted a booking";
-        $activity->bookingid = $id;
-        $activity->userid = Auth::id();
+        $activity->action = $message;
+        $activity->booking_id = $id;
+        $activity->user_id = Auth::id();
         $activity->user = Auth::user()->name;
         $activity->save();
-        return redirect('bookings')->with('success','Booking has been deleted');
-        
     }
 }

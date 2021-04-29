@@ -12,14 +12,10 @@
 @section('content')
 <div class="container" style="margin:0; padding:0;">
     <div class="row justify-content-center">
-        <div class="col-md-3">
-            <div class="sidebar">
-                @include('sidebar')            
-            </div>
-        </div>
-        <div class="col-md-9" style="margin-top: 50px;">
+        @include('sidebar')
+        <div class="offset-md-1 col-md-9" style="margin-top:50px;">
             <div class="card">
-                <div class="card-header">Children</div>
+                <div class="card-header">Club Attendance Register</div>
                 <div class="card-body">
                     <table class="table table-striped">
                         <thead>
@@ -27,60 +23,41 @@
                                 <th class="text-center">First Name</th>
                                 <th class="text-center">Last Name</th>
                                 <th class="text-center">Date of Birth</th>
-                                <th class="text-center">Dietary Requirements</th>
-                                <th class="text-center">Food Arrangement</th>
                                 <th class="text-center" style="color: black;">Attendance</th>
                             </tr>
                         </thead>
                         <tbody>
-                        @foreach($pupils as $pupil)
+                        @foreach($booked_pupils as $booked_pupil)
                                 <tr>
-                                    <td class="text-center">{{ $pupil->first_name }}</td>
-                                    <td class="text-center">{{ $pupil->last_name }}</td>
-                                    <td class="text-center">{{ $pupil->date_of_birth }}</td>
-                                    @if($pupil->dietary_requirements == "Other")
-                                        <td class="text-center">{{ $pupil->other_dietary_requirements }}</td>
-                                    @else
-                                        <td class="text-center">{{ $pupil->dietary_requirements }}</td>
-                                    @endif
-                                    <td class="text-center">{{ $pupil->food_arrangement }}</td>
-                                    <td style="display: flex;">
-                                    <form class="form-horizontal" method="POST" action="{{ action('App\Http\Controllers\PupilRegisterController@update', $pupil->id) }} " enctype="multipart/form-data" >
+                                    <td class="text-center">{{ $pupils->where('id', $booked_pupil->pupil_id)->first()->first_name }}</td>
+                                    <td class="text-center">{{ $pupils->where('id', $booked_pupil->pupil_id)->first()->last_name }}</td>
+                                    <td class="text-center">{{ $pupils->where('id', $booked_pupil->pupil_id)->first()->date_of_birth }}</td>
+                                    <td>
+                                    <div class="row">
+                                    <form class="form-horizontal offset-md-2" method="POST" action="{{ action('App\Http\Controllers\PupilRegisterController@update', $booked_pupil->pupil_id) }} " enctype="multipart/form-data" >
                                     @method('PATCH')
                                     @csrf
-                                    <?php 
-                                        $carry_on = true;
-                                        foreach($booked_pupils as $booked_pupil) {
-                                            if($carry_on) {
-                                                if($pupil->id == $booked_pupil->pupil_id) {
-                                                    if($booked_pupil->checked_in == null) {
-                                                        echo '<input type="submit" class="btn" value="Check In" />';
-                                                        $carry_on = false;
-                                                    }
-                                                    else if($booked_pupil->checked_in != null && $booked_pupil->checked_out == null) {
-                                                        echo '<input type="submit" class="btn" value="Check Out" />';
-                                                        $carry_on = false;
-                                                    }
-                                                    else if($booked_pupil->checked_in != null && $booked_pupil->checked_out == null) {
-                                                        echo '<input type="submit" class="btn" value="Check In" />';
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        $carry_on = true;
-                                    ?>
+                                        @if($booked_pupil->checked_in == null)
+                                            <input type="submit" class="btn" value="Check In" />
+                                        @elseif($booked_pupil->checked_in != null && $booked_pupil->checked_out == null)
+                                            <input type="submit" class="btn" value="Check Out" />
+                                        @elseif($booked_pupil->checked_in != null && $booked_pupil->checked_out == null)
+                                            <input type="submit" class="btn" value="Check In" />
+                                        @endif
                                     </form>
                                     <form style="margin-left: 5px;" class="form-horizontal" method="POST" 
-                                    action="{{ action('App\Http\Controllers\PupilRegisterUndoController@update', $pupil->id) }} " enctype="multipart/form-data">
+                                    action="{{ action('App\Http\Controllers\PupilRegisterUndoController@update', $booked_pupil->pupil_id) }} " enctype="multipart/form-data">
                                     @method('PATCH')
                                     @csrf
                                         <button type="submit" class="btn material-icons" value="Undo">undo</button>
                                     </form>
+                                    </div>
                                     </td>
                                     </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    {{ $booked_pupils->links() }}
                 </div>
             </div>
         </div>

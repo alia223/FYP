@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Injury extends Model
 {
+    use softDeletes;
     use HasFactory;
 
     
@@ -15,5 +17,5 @@ class Injury extends Model
     *
     * @var array
     */
-    protected $fillable = ['studentid', 'date_of_injury','comment'];
+    protected $fillable = ['pupil_id', 'date_of_injury','comment'];
 }

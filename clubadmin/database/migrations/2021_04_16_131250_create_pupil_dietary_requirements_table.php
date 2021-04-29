@@ -17,6 +17,7 @@ class CreatePupilDietaryRequirementsTable extends Migration
             $table->id();
             $table->bigInteger('pupil_id')->unsigned();
             $table->string('dietary_requirements');
+            $table->string('other_dietary_requirements')->nullable();
             $table->timestamps();
             $table->foreign('pupil_id')->references('id')->on('pupils'); 
         });

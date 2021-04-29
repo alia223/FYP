@@ -75,7 +75,7 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
             //if there are no bookings on the date contained within this current cell
             else{
                 //if the user is an admin
-                if(!Gate::denies('admin')) {
+                if(!Gate::denies('admin') || !Gate::denies('clubstaff')) {
                     //apply admin rule colours and direct admin to a page showing all bookings
                     $week .= '<td style="border-width: 3px; border-color:'.$rules->brand_colour.'"><a class="btn" style="border-style: solid; border-color:rgb(0,0,0); 
                     background-color: white; color: black;"';
@@ -111,7 +111,7 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
             //otherwise, if there are no bookings
             else{
                 //if it is an admin account
-                if(!Gate::denies('admin')) {
+                if(!Gate::denies('admin') || !Gate::denies('clubstaff')) {
                     //apply default black and white style and direct admin to booking page displaying 0 bookings
                     $week .= '<td><a class="btn" style="background-color: white; border-style: solid; border-color:rgb(0,0,0); color: black"';
                     $week .= 'href="';
@@ -168,14 +168,9 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
 }
 ?>
 <div class="container" style="margin: 0; padding: 0;">
-    <div class="row">
-        <div class="col-md-2">
-            <div class="sidebar" style="height:screen-height;">
-                @include('sidebar')            
-            </div>
-        </div>
-        <div class="col-md-2"></div>
-            <div class="col-md-8">
+    <div class="row justify-content-center">
+        @include('sidebar')
+            <div class="offset-md-1 col-md-9" style="margin-top:50px;">
                     <table style="margin: 0 auto;">
                         <tr>
                             <td>
@@ -207,7 +202,9 @@ for ($day = 1; $day <= $day_count; $day++, $str++) {
     </div>
 </div>
 <script type="text/javascript">
-    $('#bookings').addClass('active');
+    $('#admin_bookings').addClass('active');
+    $('#clubstaff_bookings').addClass('active');
+    $('#parent_bookings').addClass('active');
     $('.btn').on("click", function() {
         getDate($(this).attr("value"))
     });

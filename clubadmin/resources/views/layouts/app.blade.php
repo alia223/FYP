@@ -24,6 +24,7 @@
     <style>
         * {
             margin: 0;
+            box-sizing: border-box;
         }
         .btn {
             background-color: <?php echo $rules->brand_colour?>; 
@@ -45,7 +46,7 @@
         }
 
         .sidebar{
-            
+            height: 94vh;
         }
 
         .custom-buttons {
@@ -71,6 +72,14 @@
 
         td {
             height: 30px;
+        }
+        
+        .page-link {
+            color: <?php echo $rules->brand_colour?>;
+        }
+
+        .page-item.active .page-link {
+            background-color: <?php echo $rules->brand_colour?>;
         }
     </style>
 </head>

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Auth;
-use App\Models\BookedStudent;
-use App\Models\Student;
+use App\Models\BookedPupil;
+use App\Models\Pupil;
 use Gate;
 
 class HomeController extends Controller
@@ -28,12 +28,14 @@ class HomeController extends Controller
     public function index()
     {
         if(Gate::denies('admin') && Gate::denies('clubstaff')) {
-            $booked_students = BookedStudent::all()->where('parentid', Auth::id())->where('booking_date', date('Y-m-d', strtotime("today")))->where('checked_in', '!=', NULL);
-            $students = array();
-            foreach($booked_students as $booked_student) {
-                array_push($students, Student::find($booked_student->studentid));
+            $booked_pupils = BookedPupil::all()->where('parent_id', Auth::id())
+            ->where('booking_date', date('Y-m-d', strtotime("today")))
+            ->where('checked_in', '!=', NULL);
+            $pupils = array();
+            foreach($booked_pupils as $booked_pupil) {
+                array_push($pupils, Pupil::find($booked_pupil->pupil_id));
             }
-            return view('home', compact('students', 'booked_students'));
+            return view('home', compact('pupils', 'booked_pupils'));
         }
         return view('home');
     }

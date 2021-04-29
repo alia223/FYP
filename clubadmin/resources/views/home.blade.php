@@ -12,12 +12,8 @@
 @section('content')
 <div class="container" style="margin:0; padding:0;">
   <div class="row justify-content-center">
-      <div class="col-md-4">
-        <div class="sidebar">
-          @include('sidebar')
-        </div>
-      </div>
-      <div class="col-md-8" style="margin-top:50px;">
+    @include('sidebar')
+    <div class="offset-md-1 col-md-9" style="margin-top:50px;">
         <div class="card">
           <div class="card-header">{{ __('Dashboard') }}</div>
             <div class="card-body">

@@ -23,6 +23,7 @@ Route::resource('bookings', App\Http\Controllers\BookingController::class);
 Route::resource('repeat-bookings', App\Http\Controllers\RepeatBookingController::class);
 Route::resource('create-bookings', App\Http\Controllers\CreateBookingsController::class);
 Route::resource('pupils', App\Http\Controllers\PupilController::class);
+Route::resource('pupil-dietary-requirements', App\Http\Controllers\PupilDietaryRequirementController::class);
 Route::resource('booked-pupils', App\Http\Controllers\BookedPupilController::class);
 Route::resource('pupil-register', App\Http\Controllers\PupilRegisterController::class);
 Route::resource('pupil-register-undo', App\Http\Controllers\PupilRegisterUndoController::class);
