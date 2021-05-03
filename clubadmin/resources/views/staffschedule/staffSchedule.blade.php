@@ -29,7 +29,15 @@
                 </div><br /> 
                 @endif
                 <div class="card-body">
-                    <table class="table table-striped">
+                    <?php $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']; ?>
+                    <div class="row">
+                        <button id="button1" class="btn offset-md-1 col-md-2">Monday</button>
+                        <button id="button2" class="btn col-md-2">Tuesday</button>
+                        <button id="button3" class="btn col-md-2">Wednesday</button>
+                        <button id="button4" class="btn col-md-2">Thursday</button>
+                        <button id="button5" class="btn col-md-2">Friday</button>
+                    </div>
+                    <table class="table">
                         <thead class="text-center">
                             <tr>   
                                 <th>Day</th>
@@ -39,8 +47,8 @@
                         </thead>
                         <tbody class="text-center">
                             @for($i = 0;$i < 5;$i++)
-                            <tr>
-                                <td>{{$dotw[$i]}}<br />Monday</td>
+                            <tr id="{{ $days[$i] }}">
+                                <td>{{$dotw[$i]}}<br />{{ $days[$i] }}</td>
                                 <td>
                                     @foreach($staffAvailability->where('day', $i+1)->where('available_until', '!=', 0) as $sa)
                                         {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
@@ -54,7 +62,11 @@
                                     @endif
                                     @csrf
                                         <input type="hidden" name="day" value="{{$i+1}}" />
-                                        <input type="submit" class="col-md-8 btn btn-primary" value="See Staff Schedule" />
+                                        @if(!Gate::denies('admin'))
+                                            <input type="submit" class="col-md-8 btn btn-primary" value="Calculate Staff Schedule" />
+                                        @else 
+                                            <input type="submit" class="col-md-8 btn btn-primary" value="See Staff Schedule" />
+                                        @endif
                                     </form>
                                 </td>
                             </tr>
@@ -68,6 +80,77 @@
 </div>
 <script type="text/javascript">
   $('#staff_schedule').addClass('active'); 
+    $('#Monday').show();
+    $('#button1').css('background-color','#8400ff');
+    $('#button2').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button3').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button4').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button5').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#Tuesday').hide();
+    $('#Wednesday').hide();
+    $('#Thursday').hide();
+    $('#Friday').hide();
+  $('#button1').on('click', function(){
+    $('#Monday').show();
+    $('#button1').css({'background-color':'#8400ff', 'color':'#ffffff'});
+    $('#button2').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button3').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button4').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button5').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#Tuesday').hide();
+    $('#Wednesday').hide();
+    $('#Thursday').hide();
+    $('#Friday').hide();
+  });
+  $('#button2').on('click', function(){
+    $('#Monday').hide();
+    $('#Tuesday').show();
+    $('#button1').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button2').css({'background-color':'#8400ff', 'color':'#ffffff'});
+    $('#button3').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button4').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button5').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#Wednesday').hide();
+    $('#Thursday').hide();
+    $('#Friday').hide();
+  });
+  $('#button3').on('click', function(){
+    $('#Monday').hide();
+    $('#Tuesday').hide();
+    $('#Wednesday').show();
+    $('#button1').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button2').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button3').css({'background-color':'#8400ff', 'color':'#ffffff'});
+    $('#button4').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button5').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#Thursday').hide();
+    $('#Friday').hide();
+  });
+  $('#button4').on('click', function(){
+    $('#Monday').hide();
+    $('#Tuesday').hide();
+    $('#Wednesday').hide();
+    $('#Thursday').show();
+    $('#button1').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button2').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button3').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button4').css({'background-color':'#8400ff', 'color':'#ffffff'});
+    $('#button5').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#Friday').hide();
+  });
+  $('#button5').on('click', function(){
+    $('#Monday').hide();
+    $('#Tuesday').hide();
+    $('#Wednesday').hide();
+    $('#Thursday').hide();
+    $('#Friday').show();
+    $('#button1').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button2').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button3').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button4').css({'background-color':'#ffffff', 'color':'#8400ff'});
+    $('#button5').css({'background-color':'#8400ff', 'color':'#ffffff'});
+  });
+
 </script>
 @endsection
 </body>

@@ -1,6 +1,6 @@
 <div class="col-md-2">
 	<div class="sidebar">
-	<a id="home" href="{{ url('home') }}">Home</a>
+		<a id="home" href="{{ url('home') }}">Home</a>
 		@if(Auth::check())
 			@if (!Gate::denies('admin') && Gate::denies('clubstaff'))
 				<a id="admin_bookings" href="{{ url('bookings') }}">Bookings</a>

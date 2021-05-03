@@ -338,11 +338,14 @@ class SingleBookingTest extends TestCase
         $this->actingAs(User::factory()->create());
         $pupil1 = Pupil::factory()->create(['parent_id' => Auth::id()]);
         $pupil2 = Pupil::factory()->create(['parent_id' => Auth::id()]);
+        $pupil3 = Pupil::factory()->create(['parent_id' => Auth::id()]);
         $booking = Booking::factory()->create(['event_id' => 1, 'parent_id' => Auth::id(), 'booking_date' => '2021-04-13', 'booking_day' => 2, 'start_time' => '15:30:00', 
             'end_time' => '17:00:00',  'duration' => 90, ]);
-        $booked_pupil = BookedPupil::factory()->create(['parent_id' => Auth::id(), 'booking_id' => $booking->id, 'event_id' => $booking->event_id, 'pupil_id' => $pupil1->id, 
+        $booked_pupil1 = BookedPupil::factory()->create(['parent_id' => Auth::id(), 'booking_id' => $booking->id, 'event_id' => $booking->event_id, 'pupil_id' => $pupil1->id, 
             'booking_date' => '2021-04-13', 'booking_day' => 2, 'start_time' => '15:30:00',  'end_time' => '17:00:00', ]);
-        $booked_pupil = BookedPupil::factory()->create(['parent_id' => Auth::id(), 'booking_id' => $booking->id, 'event_id' => $booking->event_id, 'pupil_id' => $pupil2->id, 
+        $booked_pupil2 = BookedPupil::factory()->create(['parent_id' => Auth::id(), 'booking_id' => $booking->id, 'event_id' => $booking->event_id, 'pupil_id' => $pupil2->id, 
+            'booking_date' => '2021-04-13', 'booking_day' => 2, 'start_time' => '15:30:00',   'end_time' => '17:00:00', ]);
+        $booked_pupil3 = BookedPupil::factory()->create(['parent_id' => Auth::id(), 'booking_id' => $booking->id, 'event_id' => $booking->event_id, 'pupil_id' => $pupil3->id, 
             'booking_date' => '2021-04-13', 'booking_day' => 2, 'start_time' => '15:30:00',   'end_time' => '17:00:00', ]);
         //Check that these 2 pupils are booked in
         $this->assertDatabaseHas('bookings',['id' => $booking->id, 'event_id' => $booking->event_id, 'parent_id' => Auth::id(), 'booking_date' => '2021-04-13', 'booking_day' => 2,
@@ -351,15 +354,20 @@ class SingleBookingTest extends TestCase
             'booking_date' => '2021-04-13', 'booking_day' => 2, 'start_time' => '15:30:00', 'end_time' => '17:00:00']);
         $this->assertDatabaseHas('booked_pupils',['booking_id' => $booking->id, 'event_id' => $booking->event_id, 'parent_id' => Auth::id(), 'pupil_id' => $pupil2->id,
             'booking_date' => '2021-04-13', 'booking_day' => 2, 'start_time' => '15:30:00', 'end_time' => '17:00:00']);
+        $this->assertDatabaseHas('booked_pupils',['booking_id' => $booking->id, 'event_id' => $booking->event_id, 'parent_id' => Auth::id(), 'pupil_id' => $pupil3->id,
+        'booking_date' => '2021-04-13', 'booking_day' => 2, 'start_time' => '15:30:00', 'end_time' => '17:00:00']);
 
         $this->delete('/bookings/'.$booking->id);
         //Check that these 2 pupils are no longer booked in (because a non-admin user is logged in, bookings are marked as deleted in database but not permanently deleted)
         $this->assertSoftDeleted('bookings', ['id' => $booking->id, 'event_id' => $booking->event_id, 'parent_id' => Auth::id(), 'booking_date' => '2021-04-13',
             'booking_day' => 2, 'start_time' => '15:30:00', 'end_time' => '17:00:00', 'duration' => 90
         ]);
+        
         $this->assertSoftDeleted('booked_pupils',['parent_id' => Auth::id(), 'event_id' => $booking->event_id, 'pupil_id' => $pupil1->id, 'booking_date' => '2021-04-13',
             'booking_day' => 2, 'start_time' => '15:30:00', 'end_time' => '17:00:00']);
-        $this->assertSoftDeleted('booked_pupils',['parent_id' => Auth::id(), 'event_id' => $booking->event_id, 'pupil_id' => $pupil2->id, 'booking_date' => '2021-04-13', #
+        $this->assertSoftDeleted('booked_pupils',['parent_id' => Auth::id(), 'event_id' => $booking->event_id, 'pupil_id' => $pupil2->id, 'booking_date' => '2021-04-13',
             'booking_day' => 2, 'start_time' => '15:30:00', 'end_time' => '17:00:00']);
+        $this->assertSoftDeleted('booked_pupils',['parent_id' => Auth::id(), 'event_id' => $booking->event_id, 'pupil_id' => $pupil3->id, 'booking_date' => '2021-04-13',
+        'booking_day' => 2, 'start_time' => '15:30:00', 'end_time' => '17:00:00']);
     }
 }

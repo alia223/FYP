@@ -81,6 +81,13 @@
         .page-item.active .page-link {
             background-color: <?php echo $rules->brand_colour?>;
         }
+
+        a:focus,
+button:focus,
+input:focus,
+textarea:focus {
+outline: none !important;
+}
     </style>
 </head>
 <body>
