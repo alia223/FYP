@@ -41,7 +41,9 @@
                         <thead class="text-center">
                             <tr>   
                                 <th>Day</th>
-                                <th>Available Staff</th>
+                                @if(!Gate::denies('admin'))
+                                    <th>Available Club Staff Members</th>
+                                @endif
                                 <th></th>
                             </tr>
                         </thead>
@@ -49,11 +51,13 @@
                             @for($i = 0;$i < 5;$i++)
                             <tr id="{{ $days[$i] }}">
                                 <td>{{$dotw[$i]}}<br />{{ $days[$i] }}</td>
-                                <td>
-                                    @foreach($staffAvailability->where('day', $i+1)->where('available_until', '!=', 0) as $sa)
-                                        {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
-                                    @endforeach
-                                </td>
+                                @if(!Gate::denies('admin'))
+                                    <td>
+                                        @foreach($staffAvailability->where('day', $i+1)->where('available_until', '!=', 0) as $sa)
+                                            {{ $staff->where('id', $sa->staff_id)->first()->name }} {{ $staff->where('id', $sa->staff_id)->first()->last_name }}: <?php echo $rules->club_start ?> - {{ $sa->available_until }} <br />
+                                        @endforeach
+                                    </td>
+                                @endif
                                 <td>            
                                     @if(!Gate::denies('admin'))
                                         <form method="POST" action="{{ action('App\Http\Controllers\StaffScheduleController@store') }}">

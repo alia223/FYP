@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Rule;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ActivityLog;
 
 class RuleController extends Controller
 {
@@ -46,6 +48,14 @@ class RuleController extends Controller
             $rules->brand_logo = $brand_logo;
         }
         $rules->save();
+        $this->log_activity("Rules in control panel updated");
         return view('admin.controlPanel');
+    }
+
+    public function log_activity($message) {
+        $activity = new ActivityLog;
+        $activity->action = $message;
+        $activity->user_id = Auth::id();
+        $activity->save();
     }
 }

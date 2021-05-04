@@ -8,7 +8,7 @@ use App\Models\Pupil;
 use App\Models\Booking;
 use App\Models\BookedPupil;
 use App\Models\PupilDietaryRequirement;
-use App\Models\Room;
+use App\Models\ActivityLog;
 use DB;
 use Gate;
 class PupilRegisterController extends Controller
@@ -99,9 +99,11 @@ class PupilRegisterController extends Controller
         foreach($pupils as $pupil) {
             if($pupil->checked_in == null && $pupil->checked_out == null) {
                 $pupil->checked_in = date('H:i:s');
+                $this->log_activity("Checked a pupil in");
             }
             else if($pupil->checked_in != null && $pupil->checked_out == null) {
                 $pupil->checked_out = date('H:i:s');
+                $this->log_activity("Checked a pupil out");
             }
             else if($pupil->checked_in != null && $pupil->checked_out != null) {
 
@@ -119,5 +121,12 @@ class PupilRegisterController extends Controller
     public function destroy()
     {
         //
+    }
+
+    public function log_activity($message) {
+        $activity = new ActivityLog;
+        $activity->action = $message;
+        $activity->user_id = Auth::id();
+        $activity->save();
     }
 }

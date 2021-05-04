@@ -20,23 +20,22 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>   
-                                    <th  class="text-center">Activity</th>
-                                    <th  class="text-center">Booking ID</th>
-                                    <th  class="text-center">User ID</th>
-                                    <th  class="text-center">Time</th>
+                                    <th class="text-center">User ID</th>
+                                    <th class="text-center">Activity</th>
+                                    <th class="text-center">Time</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($activities as $activity)
                                 <tr>
+                                    <td class="text-center">{{ $activity->user_id }}</td>
                                     <td class="text-center">{{ $activity->action }}</td>
-                                    <td  class="text-center">{{ $activity->booking_id }}</td>
-                                    <td  class="text-center">{{ $activity->user_id }}</td>
-                                    <td  class="text-center">{{ $activity->created_at }}</td>
+                                    <td class="text-center">{{ $activity->created_at }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                        {{ $activities->links() }}
                     </div>
                 </div>
             </div>

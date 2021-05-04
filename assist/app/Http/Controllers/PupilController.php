@@ -6,7 +6,7 @@ use App\Models\Pupil;
 use App\Models\BookedPupil;
 use App\Models\PupilDietaryRequirement;
 use App\Models\Booking;
-use App\Models\Room;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use DB;
@@ -102,6 +102,7 @@ class PupilController extends Controller
                     $dietary_requirement->save();
                 }
             }
+            $this->log_activity("Added a child");
             return redirect('pupils')->withSuccess('Details of child have been saved successfully!');
     }
 
@@ -183,6 +184,7 @@ class PupilController extends Controller
                 $dietary_requirement->save();
             }
         }   
+        $this->log_activity("Updated a child's details");
         return redirect('pupils')->withSuccess('Child has been updated');
     }
 
@@ -223,6 +225,14 @@ class PupilController extends Controller
         }
         //delete pupil
         Pupil::find($id)->forceDelete();
+        $this->log_activity("Removed a child");
         return redirect('pupils')->withSuccess('Details of child have successfully been removed!');
+    }
+
+    public function log_activity($message) {
+        $activity = new ActivityLog;
+        $activity->action = $message;
+        $activity->user_id = Auth::id();
+        $activity->save();
     }
 }

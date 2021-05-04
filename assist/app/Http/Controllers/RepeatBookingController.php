@@ -119,7 +119,7 @@ class RepeatBookingController extends Controller
             $checked_booking->save();
             $this->store_pupils_associated_with_booking($request, $checked_booking, $pupils_associated_with_booking, Auth::id());
         }
-        $this->log_activity($event_id, "Created a Repeat Booking");
+        $this->log_activity("Created a Repeat Booking");
         // generate a redirect HTTP response with a success message
         return redirect('bookings/'.$request->input('date'))->withSuccess('Repeat Booking created successfully!');
     }
@@ -185,7 +185,7 @@ class RepeatBookingController extends Controller
             $pupils_associated_with_booking = $request->input('pupils');
             $this->store_pupils_associated_with_booking($request, $checked_booking, $pupils_associated_with_booking, $parent_id);
         }
-        $this->log_activity($event_id, "Updated a Repeat Booking");
+        $this->log_activity("Updated a Repeat Booking");
         return redirect('bookings/'.$bookings->first()->booking_date)->withSuccess('Repeat Booking updated successfully!');
     }
 
@@ -214,7 +214,7 @@ class RepeatBookingController extends Controller
                 $booking->forceDelete();
             }
         }
-        $this->log_activity($id, "Deleted a Repeat Booking");
+        $this->log_activity("Deleted a Repeat Booking");
         return redirect('bookings/'.$booking_date)->withSuccess('Repeat Booking cancelled successfully!');
     }
 
@@ -236,12 +236,10 @@ class RepeatBookingController extends Controller
         }
     }
 
-    public function log_activity($id, $message) {
+    public function log_activity($message) {
         $activity = new ActivityLog;
         $activity->action = $message;
-        $activity->booking_id = $id;
         $activity->user_id = Auth::id();
-        $activity->user = Auth::user()->name;
         $activity->save();
     }
 }

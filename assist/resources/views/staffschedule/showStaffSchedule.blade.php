@@ -33,7 +33,7 @@
                         <thead class="text-center">
                             <tr>   
                                 <th>Day</th>
-                                <th>Times Where Staff Still Required</th>
+                                <th>Times Where Staff Members Are <br />Still Required</th>
                                 <th>Selected Staff</th>
                             </tr>
                         </thead>
@@ -43,41 +43,19 @@
                                 <td>{{ $dotw[$day-1] }}<br />{{ $days[$day-1] }}</td>
                                 <td>
                                 <?php
-                                $pupil_num_tracker = array();
-                                //store times at which the number of pupils in the club changes
-                                $times_where_pupils_leave_club = array();
-                                //store initial number of pupils at start of club
-                                array_push($pupil_num_tracker, sizeof($booked_pupils->where('booking_date', $dotw[$day-1])));
-                                //store the start time of the club
-                                array_push($times_where_pupils_leave_club, $rules->club_start);
                                 //at each possible time that a pupil can leave, check and store how many pupils are still in the club and at what time 
                                 //the pupil(s) has left the club
-                                foreach($club_time_intervals as $cti) {
-                                    //get all pupils leaving at this current time
-                                    $temp = sizeof($booked_pupils->where('booking_date', $dotw[$day-1])->where('end_time', '>=', $cti));
-                                    //store num of pupils remaining in club
-                                    array_push($pupil_num_tracker, ($pupil_num_tracker[sizeof($pupil_num_tracker) - 1] - $temp));
-                                    //store time at which the change in this number of pupils changes
-                                    array_push($times_where_pupils_leave_club, $cti);
-                                }
-                                $count = 0;
-                                $pupil_ratio = $rules->pupil_ratio;
-                                foreach($pupil_num_tracker as $snt) {
-                                    if(ceil($pupil_num_tracker[$count] / $pupil_ratio) < 2) {
-                                        $pupil_num_tracker[$count] = 2;
+                                for($i = (strtotime($rules->club_start) + ($rules->club_duration_step) * 60);$i < strtotime($rules->club_end);$i += ($rules->club_duration_step) * 60) {
+                                    $lower_bound = date('H:i:s', $i - (($rules->club_duration_step) * 60)); 
+                                    $upper_bound = date('H:i:s', $i);
+                                    $students_in_club = sizeof($booked_pupils->where('booking_date', $dotw[$day-1])->where('end_time', '>=', $upper_bound));
+                                    $number_of_staff_required_at_this_time = ceil($students_in_club / $rules->pupil_ratio) == 1 ? 2 : ceil($students_in_club / $rules->pupil_ratio);
+                                    if(sizeof($booked_pupils->where('booking_date', $dotw[$day-1])) > 0 && sizeof($staffSchedule->where('day', $day)->where('working_from', '<=',  $lower_bound)->where('working_until', '>=',  $upper_bound)) < $number_of_staff_required_at_this_time) {
+                                        $number_of_staff_still_required = $number_of_staff_required_at_this_time - sizeof($staffSchedule->where('day', $day)->where('working_from', '<=',  $lower_bound)->where('working_until', '>=',  $upper_bound));
+                                        echo "$lower_bound - $upper_bound : $number_of_staff_still_required staff required <br />";
                                     }
-                                    else {
-                                        $pupil_num_tracker[$count] = ceil($pupil_num_tracker[$count] / $pupil_ratio);
-                                    }
-                                    $count++;
                                 }
                                 ?>
-                                @for($i = 0;$i < sizeof($times_where_pupils_leave_club) - 1;$i++)
-                                    @if(sizeof($booked_pupils->where('booking_date', $dotw[$day-1])) > 0 && sizeof($staffSchedule->where('day', $day)->where('working_from', '<=',  $times_where_pupils_leave_club[$i])->where('working_until', '>=',  $times_where_pupils_leave_club[$i+1])) < $pupil_num_tracker[$i])
-                                        {{ $times_where_pupils_leave_club[$i] }} - {{ $times_where_pupils_leave_club[$i+1] }}: {{ $pupil_num_tracker[$i] - 
-                                        sizeof($staffSchedule->where('day', $day)->where('working_from', '<=',  $times_where_pupils_leave_club[$i])->where('working_until', '>=',  $times_where_pupils_leave_club[$i+1]))}}  staff required<br />
-                                    @endif
-                                @endfor
                                 </td>
                                 <td>
                                 <?php 

@@ -92,6 +92,7 @@ class StaffAvailabilityController extends Controller
             $staffAvailablity->max_hours = $request->input('max_hours')*60;
             $staffAvailablity->save();
         }
+        $this->log_activity("Staff member updated avalability");
         return redirect('staff-availability');
     }
     
@@ -102,6 +103,12 @@ class StaffAvailabilityController extends Controller
         $next_week_thursday = date('Y-m-d', strtotime($next_week_monday."+3 days"));
         $next_week_friday = date('Y-m-d', strtotime($next_week_monday."+4 days"));
         return [$next_week_monday, $next_week_tuesday, $next_week_wednesday, $next_week_thursday, $next_week_friday];
+    }
 
+    public function log_activity($message) {
+        $activity = new ActivityLog;
+        $activity->action = $message;
+        $activity->user_id = Auth::id();
+        $activity->save();
     }
 }

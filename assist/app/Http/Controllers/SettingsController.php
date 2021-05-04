@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 
 class SettingsController extends Controller
@@ -59,8 +60,14 @@ class SettingsController extends Controller
 
         // save the Booking object
         $user->save();
+        $this->log_activity("Updated settings");
         return redirect('settings')->with('success','Settings have been updated');
     }
 
-    
+    public function log_activity($message) {
+        $activity = new ActivityLog;
+        $activity->action = $message;
+        $activity->user_id = Auth::id();
+        $activity->save();
+    }
 }

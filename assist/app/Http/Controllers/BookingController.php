@@ -115,7 +115,7 @@ class BookingController extends Controller
         }
         $booking->save();
         $this->store_pupils_associated_with_booking($booking, $pupils_associated_with_booking, Auth::id());
-        $this->log_activity($booking->id, "Created a booking");
+        $this->log_activity("Created a booking");
         // generate a redirect HTTP response with a success message
         return redirect('bookings/'.$booking_date)->withSuccess('Booking created successfully!');
     }
@@ -215,7 +215,7 @@ class BookingController extends Controller
             $booked_pupil->forceDelete();
         }
         $this->store_pupils_associated_with_booking($booking, $pupils_associated_with_booking);
-        $this->log_activity($id, "Updated a booking");
+        $this->log_activity("Updated a booking");
         return redirect('bookings/'.$booking->booking_date)->withSuccess('Booking updated successfully!');
     }
 
@@ -241,6 +241,7 @@ class BookingController extends Controller
         if(!Gate::denies('admin')) {
             $booking->forceDelete();
         }
+        $this->log_activity("Deleted a booking");
         return redirect('bookings/'.$booking_date)->withSuccess('Booking cancelled successfully!');
     }
 
@@ -262,12 +263,10 @@ class BookingController extends Controller
         }
     }
 
-    public function log_activity($id, $message) {
+    public function log_activity($message) {
         $activity = new ActivityLog;
         $activity->action = $message;
-        $activity->booking_id = $id;
         $activity->user_id = Auth::id();
-        $activity->user = Auth::user()->name;
         $activity->save();
     }
 }

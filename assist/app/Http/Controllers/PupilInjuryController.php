@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Injury;
 use App\Models\Pupil;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Gate;
 use DB;
 
@@ -66,6 +67,7 @@ class PupilInjuryController extends Controller
         $injury->description = $request->input('description_of_injury');
         $injury->save();
         $pupils = Pupil::all();
+        $this->log_activity("Added an injury");
         return redirect('injuries/'.$request->input('pupil_id'))->withSuccess('Description of injury added successfully!');
     }
 
@@ -118,6 +120,7 @@ class PupilInjuryController extends Controller
         $injury->description = $request->input('description_of_injury');
         $injury->save();
         $pupils = Pupil::all();
+        $this->log_activity("Edited an injury");
         return redirect('pupils')->withSuccess("Descrition of injury has been udpated successfully!");
     }
 
@@ -135,6 +138,14 @@ class PupilInjuryController extends Controller
         else {
             $injury = Injury::where('id', $id)->forceDelete();
         }
+        $this->log_activity(Auth::id(), "Removed an injury");
         return back()->withSuccess('Injury Removed.');
+    }
+
+    public function log_activity($message) {
+        $activity = new ActivityLog;
+        $activity->action = $message;
+        $activity->user_id = Auth::id();
+        $activity->save();
     }
 }

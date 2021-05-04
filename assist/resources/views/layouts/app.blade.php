@@ -94,7 +94,7 @@ outline: none !important;
     <div id="app">
         <nav id="navbar" class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: <?php echo $rules->brand_colour; ?>; padding: 0;">
             <div class="container">
-            <img src="/storage/images/<?php echo $rules->brand_logo ?>" height="35px" width="35px" style="margin-right: 10px;"/>
+            <img src="http://127.0.0.1/assist/storage/app/public/images/{{$rules->brand_logo}}" height="35px" width="35px" style="margin-right: 10px;"/>
                 <a class="navbar-brand" id="navbar-brand" href="{{ url('home') }}" style="color:<?php echo $rules->text_colour;?>; padding: 0;">
                     {{ config('app.name', 'Laravel') }}
                 </a>

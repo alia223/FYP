@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use DB;
 
 class ActivityLogController extends Controller
 {
@@ -23,7 +24,7 @@ class ActivityLogController extends Controller
      */
     public function index()
     {
-        $activities = ActivityLog::all();
+        $activities = DB::table('activity_logs')->select('*')->paginate(5);
         return view('admin.activityLog', array('activities'=>$activities));
     }
 

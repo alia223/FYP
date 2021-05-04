@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Pupil;
 use App\Models\BookedPupil;
 use App\Models\Booking;
-use App\Models\Room;
+use App\Models\ActivityLog;
 class PupilRegisterUndoController extends Controller
 {
     /**
