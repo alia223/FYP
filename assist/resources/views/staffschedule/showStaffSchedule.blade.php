@@ -45,7 +45,7 @@
                                 <?php
                                 //at each possible time that a pupil can leave, check and store how many pupils are still in the club and at what time 
                                 //the pupil(s) has left the club
-                                for($i = (strtotime($rules->club_start) + ($rules->club_duration_step) * 60);$i < strtotime($rules->club_end);$i += ($rules->club_duration_step) * 60) {
+                                for($i = (strtotime($rules->club_start) + ($rules->club_duration_step) * 60);$i <= strtotime($rules->club_end);$i += ($rules->club_duration_step) * 60) {
                                     $lower_bound = date('H:i:s', $i - (($rules->club_duration_step) * 60)); 
                                     $upper_bound = date('H:i:s', $i);
                                     $students_in_club = sizeof($booked_pupils->where('booking_date', $dotw[$day-1])->where('end_time', '>=', $upper_bound));
