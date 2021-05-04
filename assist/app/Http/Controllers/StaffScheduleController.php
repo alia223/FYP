@@ -54,7 +54,7 @@ class StaffScheduleController extends Controller
         //store all of the dates for the following week from mon - fri. Reason for this is, the dat of the week is passed as a parameter($day)
         // so then we can collect all the pupils booked in on the $day of this week. E.g. if admin wants to assig staff to monday, 
         //then the system finds all pupils booked in on the monday in this week and the algorithm works from there
-        for($i = (strtotime($rules->club_start) + ($rules->club_duration_step) * 60);$i < strtotime($rules->club_end);$i += ($rules->club_duration_step) * 60) {
+        for($i = (strtotime($rules->club_start) + ($rules->club_duration_step) * 60);$i <= strtotime($rules->club_end);$i += ($rules->club_duration_step) * 60) {
             $lower_bound = date('H:i:s', $i - (($rules->club_duration_step) * 60)); 
             $upper_bound = date('H:i:s', $i);
             $students_in_club = sizeof(BookedPupil::all()->where('booking_date', $dotw[$day-1])->where('end_time', '>=', $upper_bound));
