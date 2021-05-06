@@ -92,7 +92,7 @@ class StaffAvailabilityController extends Controller
             $staffAvailablity->max_hours = $request->input('max_hours')*60;
             $staffAvailablity->save();
         }
-        $this->log_activity("Staff member updated avalability");
+        $this->log_activity("Staff member updated availability");
         return redirect('staff-availability');
     }
     

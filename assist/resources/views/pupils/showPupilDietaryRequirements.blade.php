@@ -18,7 +18,7 @@
             @if(Gate::denies('clubstaff'))
                 <div class="card-header">Children</div>
             @else
-                <div class="card-header">Pupils</div>
+                <div class="card-header">Pupil Dietary Requirements</div>
             @endif
                 @if (session('success'))
                     <div class="alert alert-success">

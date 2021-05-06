@@ -40,7 +40,7 @@ class BookingController extends Controller
         if(Gate::denies('admin') && Gate::denies('clubstaff')) {
             $bookings = Booking::all()->where('parent_id', Auth::id());
         }
-        else {
+        else if(!Gate::denies('clubstaff')) {
             $bookings = Booking::all();
         }
         return view('bookings.booking', compact('bookings'));
@@ -131,12 +131,12 @@ class BookingController extends Controller
         //parent has clicked on a date on the calendar, so show bookings that belong to only that parent, on that date
         //or if it is the admin/cklubstaff clicking on a date on the calendar, 
         //then show all bookings on that regardless of who the booking belongs to 
-        $bookings = Booking::withTrashed()->where('booking_date', $date)->get();
+        $bookings = Booking::withTrashed()->where('booking_date', $date)->paginate(5);
         if(Gate::denies('admin') && Gate::denies('clubstaff')) {
-            $bookings = Booking::all()->where('parent_id', Auth::id())->where('booking_date', $date);
+            $bookings = Booking::where('parent_id', Auth::id())->where('booking_date', $date)->paginate(5);
         }
-        else {
-            $bookings = Booking::withTrashed()->where('booking_date', $date)->get();
+        else if(!Gate::denies('clubstaff')) {
+            $bookings = Booking::where('booking_date', $date)->paginate(5);
         }
         $booked_pupils = BookedPupil::withTrashed()->get();
         $pupils = Pupil::all();
@@ -201,10 +201,11 @@ class BookingController extends Controller
         //besides the booking itself, get all other bookings
         $bookings_to_check = Booking::all()->where('id','!=',$id)->where('parent_id', $booking->parent_id);
         $pupils_already_booked_in = BookedPupil::all()->where('booking_id','!=',$booking->id)->where('parent_id', $booking->parent_id)->where('booking_date', $booking->booking_date)->pluck('pupil_id')->toArray();
-        if(sizeof($pupils_already_booked_in) > 0) {
-            return back()->withErrors(
-                ['errors' => [implode(",",$pupils_already_booked_in), $booking->booking_date]
-            ]);
+        foreach($request->input('pupils') as $pupil) {
+            if(in_array($pupil, $pupils_already_booked_in)) {
+                $pupil_already_booked_in = Pupil::where('id', $pupil)->first();
+                return back()->withErrors(['errors' => ["$pupil_already_booked_in->first_name $pupil_already_booked_in->last_name"]]);
+            }
         }
         $booking->save();
         //Check is complete so just update booked pupils related to this booking by clearing whatever choice is already stored in db

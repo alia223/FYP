@@ -6,6 +6,8 @@ use App\Models\Pupil;
 use App\Models\BookedPupil;
 use App\Models\PupilDietaryRequirement;
 use App\Models\Booking;
+use App\Models\Rule;
+use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +39,8 @@ class PupilController extends Controller
             $pupils = DB::table('pupils')->select('*')->where('parent_id', Auth::id())->paginate(5);
         }
         $pupil_dietary_requirements = PupilDietaryRequirement::all();
-        return view('pupils.showPupils',compact('pupils', 'pupil_dietary_requirements'));
+        $parents = User::all();
+        return view('pupils.showPupils',compact('pupils', 'pupil_dietary_requirements', 'parents'));
     }
 
     /**
@@ -66,11 +69,12 @@ class PupilController extends Controller
             'pupil_other' => 'nullable|string',
             'pupil_food_arrangement' => 'required|string'
             ]);
+            $rules = Rule::all()->first();
             if(sizeof(Pupil::where('first_name', $request->input('pupil_first_name'))->where('last_name', $request->input('pupil_last_name'))->get()) > 0 ) {
                 return back()->withErrors(['errors' => ['This child already exists.']]);
             }
-            if(date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y > 11 || date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y < 1) {
-                return back()->withErrors(['errors' => ['Child must be btween the age of 1 - 11.']]);
+            if(date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y > $rules->pupil_max_age || date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y < $rules->pupil_min_age) {
+                return back()->withErrors(['errors' => ["Child must be between the age of $rules->pupil_min_age - $rules->pupil_max_age."]]);
             }
             if(!empty($request->input('pupil_dietary_requirements'))) {
                 if(in_array('Other', $request->input('pupil_dietary_requirements')) && $request->input('pupil_other') == null) {
@@ -116,7 +120,8 @@ class PupilController extends Controller
     {
         $pupils = DB::table('pupils')->join('booked_pupils', 'pupils.id', '=', 'booked_pupils.pupil_id')->select('pupils.*')->where('booked_pupils.booking_id', $id)->paginate(5);
         $pupil_dietary_requirements = PupilDietaryRequirement::all();
-        return view('pupils.showPupils',compact('pupils', 'pupil_dietary_requirements'));
+        $parents = User::all();
+        return view('pupils.showPupils',compact('pupils', 'pupil_dietary_requirements', 'parents'));
     }
 
     /**
@@ -150,11 +155,12 @@ class PupilController extends Controller
             'pupil_other' => 'nullable|string',
             'pupil_food_arrangement' => 'string'
         ]);
+        $rules = Rule::all()->first();
         if(sizeof(Pupil::where('first_name', $request->input('pupil_first_name'))->where('id', '!=', $id)->where('last_name', $request->input('pupil_last_name'))->get()) > 0 ) {
             return back()->withErrors(['errors' => ['This child already exists.']]);
         }
-        if(date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y > 11 || date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y < 1) {
-            return back()->withErrors(['errors' => ['Child must be btween the age of 1 - 11.']]);
+        if(date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y > $rules->pupil_max_age || date_diff(date_create(date('Y-m-d')), date_create(date('Y-m-d', strtotime($request->input('pupil_date_of_birth')))))->y < $rules->pupil_min_age) {
+            return back()->withErrors(['errors' => ["Child must be between the age of $rules->pupil_min_age - $rules->pupil_max_age."]]);
         }
         if(!empty($request->input('pupil_dietary_requirements'))) {
             if(in_array('Other', $request->input('pupil_dietary_requirements')) && $request->input('pupil_other') == null) {
@@ -209,13 +215,13 @@ class PupilController extends Controller
         //delete all bookings that this pupil is associated with
         foreach($booked_pupil_booking_ids as $bpb_id) {
             //fetch all bookings this pupil is associated with
-            $booked_pupil = BookedPupil::all()->where('booking_id', $bpd_id)->first();
+            $booked_pupil = BookedPupil::all()->where('booking_id', $bpb_id)->first();
             //if these bookings have other pupils attatched to it as well (i.e. siblings of soon to be deleted pupil)
             //then don't delete the booking, just delete the pupil from the system and booked_pupils table and then the booking will appear
             //without showing this child as it doesn't exist anymore
             if(empty($booked_pupil)) {
                 //this pupil was the only pupil that belongs to this booking, so delete whole booking as pupil no longer exists in system anyway
-                Booking::find($bpd_id)->forceDelete();
+                Booking::find($bpb_id)->forceDelete();
             }
         }
         //clear dietary requirements for this student

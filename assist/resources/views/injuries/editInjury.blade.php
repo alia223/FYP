@@ -5,7 +5,7 @@
         @include('sidebar')
         <div class="offset-md-1 col-md-9" style="margin-top:50px;">
             <div class="card">
-                <div class="card-header">Edit and Update Child Details</div>
+                <div class="card-header">Edit and Update Injury Details</div>
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul>
@@ -25,7 +25,6 @@
                     @method('PATCH')
                     @csrf
                         <input type="hidden" name="date_of_injury" value="<?php echo date('Y-m-d', strtotime("today")); ?>" required/>
-                        <input type="hidden" id ="pupil_id" name="pupil_id" value="<?php foreach($pupil_id as $p_id) echo $p_id; ?>"/>
                         <div class="col-md-8">
                             <label >Description of Injury: </label>
                             <input type="text" name="description_of_injury" value="{{ $injury->description }}"/>

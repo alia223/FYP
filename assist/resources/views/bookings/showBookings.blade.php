@@ -21,10 +21,10 @@
                                         <th class="text-center">Parent ID</th>
                                     @endif
                                     <th class="text-center">Date</th>
-                                    <th class="text-center">Start Time</th>
                                     <th class="text-center">End Time</th>
                                     @if(Gate::denies('admin') && gate::denies('clubstaff'))
                                         <th class="text-center" style="color: black; width:150px;">Children</th>
+                                        <th></th>
                                     @endif
                                     @if(!Gate::denies('admin'))
                                         <th class="text-center" style="color: black;">Cancelled</th>
@@ -39,18 +39,18 @@
                                     @if(!Gate::denies('admin') || !Gate::denies('clubstaff'))
                                         <td class="text-center">{{ $booking->parent_id }}</td>
                                     @endif
-                                    <td class="text-center">{{ $booking->booking_date }}</td>
+                                    <td class="text-center">{{ date('d-m-Y', strtotime($booking->booking_date)) }}</td>
                                     <td class="text-center">{{ $booking->start_time }}</td>
                                     <td class="text-center">{{ $booking->end_time }}</td>
                                     @if(Gate::denies('admin') && Gate::denies('clubstaff'))
                                     <td style="color: black;">
                                         @if(Gate::denies('admin') && Gate::denies('clubstaff'))
                                             @foreach($booked_pupils->where('booking_id', $booking->id)->where('booking_date', $booking->booking_date)->where('parent_id', Auth::id()) as $booked_pupil) 
-                                                {{$pupils->where('id', $booked_pupil->pupil_id)->first()->first_name}} {{$pupils->where('id', $booked_pupil->pupil_id)->first()->last_name}}
+                                                {{$pupils->where('id', $booked_pupil->pupil_id)->first()->first_name}} {{$pupils->where('id', $booked_pupil->pupil_id)->first()->last_name}}<br />
                                             @endforeach
                                         @else
                                             @foreach($booked_pupils->where('booking_date', $booking->booking_date) as $booked_pupil) 
-                                                {{$pupils->where('id', $booked_pupil->pupil_id)->first()->first_name}} {{$pupils->where('id', $booked_pupil->pupil_id)->first()->last_name}}
+                                                {{$pupils->where('id', $booked_pupil->pupil_id)->first()->first_name}} {{$pupils->where('id', $booked_pupil->pupil_id)->first()->last_name}}<br />
                                             @endforeach
                                         @endif
                                     </td>
@@ -58,47 +58,42 @@
                                     @if(!Gate::denies('admin'))
                                         <td class="text-center" style="color:black;">{{ $booking->deleted_at }}</td>
                                     @endif
-                                    @if(!Gate::denies('admin') || !Gate::denies('clubstaff'))
-                                        @if($bookings->where('id', $booking->id)->first()->deleted_at == null)
-                                            <td>
-                                                <a href="{{ action('App\Http\Controllers\PupilController@show', $booking->id) }}" class="btn btn-warning material-icons" title="View Pupils">description</a>
+                                        @if(!Gate::denies('admin') || !Gate::denies('clubstaff'))
+                                                <td>
+                                                    <a href="{{ action('App\Http\Controllers\PupilController@show', $booking->id) }}" class="btn btn-warning material-icons" title="View Pupils">description</a>
+                                                </td>
+                                        @endif
+                                        @if(Gate::denies('clubstaff'))
+                                            @if($bookings->where('id', $booking->id)->first()->deleted_at == null)
+                                                <td>
+                                                    <a href="{{ action('App\Http\Controllers\BookingController@edit', $booking->id) }}" class="btn btn-warning material-icons" 
+                                                    title="Edit Booking">build</a>
+                                                </td>
+                                            @else
+                                                <td>
+                                                    <a href="" class="btn btn-warning material-icons" style="background-color: grey" title="Edit Booking">build</a>
+                                                </td>
+                                            @endif
+                                            <td class="text-center">
+                                                <form action="{{ action('App\Http\Controllers\BookingController@destroy', $booking->id) }}"
+                                                method="post"> @csrf
+                                                    <input name="_method" type="hidden" value="DELETE">
+                                                    <button class="btn btn-danger material-icons" title="Cancel Single Booking" type="submit">close</button>
+                                                </form>
                                             </td>
-                                        @else
-                                            <td>
-                                                <a href="" class="btn btn-warning material-icons" style="background-color: grey;" title="View Pupils">description</a>
+                                            <td class="text-center">
+                                                <form action="{{ action('App\Http\Controllers\RepeatBookingController@destroy', $booking->id) }}"
+                                                method="post"> @csrf
+                                                    <input name="_method" type="hidden" value="DELETE">
+                                                    <button class="btn btn-danger material-icons" title="Cancel Repeat Booking" type="submit">cancel</button>
+                                                </form>
                                             </td>
                                         @endif
-                                    @endif
-                                    @if(Gate::denies('clubstaff'))
-                                        @if($bookings->where('id', $booking->id)->first()->deleted_at == null)
-                                            <td>
-                                                <a href="{{ action('App\Http\Controllers\BookingController@edit', $booking->id) }}" class="btn btn-warning material-icons" 
-                                                title="Edit Booking">build</a>
-                                            </td>
-                                        @else
-                                            <td>
-                                                <a href="" class="btn btn-warning material-icons" style="background-color: grey" title="Edit Booking">build</a>
-                                            </td>
-                                        @endif
-                                        <td class="text-center">
-                                            <form action="{{ action('App\Http\Controllers\BookingController@destroy', $booking->id) }}"
-                                            method="post"> @csrf
-                                                <input name="_method" type="hidden" value="DELETE">
-                                                <button class="btn btn-danger material-icons" title="Cancel Single Booking" type="submit">close</button>
-                                            </form>
-                                        </td>
-                                        <td class="text-center">
-                                            <form action="{{ action('App\Http\Controllers\RepeatBookingController@destroy', $booking->id) }}"
-                                            method="post"> @csrf
-                                                <input name="_method" type="hidden" value="DELETE">
-                                                <button class="btn btn-danger material-icons" title="Cancel Repeat Booking" type="submit">cancel</button>
-                                            </form>
-                                        </td>
-                                    @endif
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                        {{ $bookings->links() }}
                     </div>
                 </div>
                 @if(Gate::denies('admin') && Gate::denies('clubstaff') && $date >= date("Y-m-d")) 

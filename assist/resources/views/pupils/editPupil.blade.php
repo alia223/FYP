@@ -74,7 +74,7 @@
                                         />Tree Nut and Peanut Allergies
                                     </label><br />
                                     <label for="fish_allergies">
-                                        <input type="checkbox" id="fish_allergies" name="pupil_dietary_requirements[]" value="Halal"
+                                        <input type="checkbox" id="fish_allergies" name="pupil_dietary_requirements[]" value="Fish Allergies"
                                             <?php 
                                             if(sizeof($pupil_dietary_requirements_collection->where('pupil_id', $pupil->id)->where('dietary_requirements', 'Fish Allergies')) > 0) {
                                                 echo "checked";
@@ -144,11 +144,11 @@
     $('#admin_bookings').addClass('active');
     $('#pupils').addClass('active');
     $('#pupil_date_of_birth').change(function(){
-        if(calculateAge($('#pupil_date_of_birth').val()) < 11 && calculateAge($('#pupil_date_of_birth').val()) > 1 && new Date($('#pupil_date_of_birth').val()) < Date.now()) {
+        if(calculateAge($('#pupil_date_of_birth').val()) < {{$rules->pupil_max_age}} && calculateAge($('#pupil_date_of_birth').val()) > {{$rules->pupil_min_age}} && new Date($('#pupil_date_of_birth').val()) < Date.now()) {
             $('#pupil_date_of_birth')[0].setCustomValidity("");
         }
         else {
-            $('#pupil_date_of_birth')[0].setCustomValidity("Age of child must be between 1 and 11!");
+            $('#pupil_date_of_birth')[0].setCustomValidity("Age of child must be between {{$rules->pupil_min_age}} and {{$rules->pupil_max_age}}");
         }
     });
     $('#other_option').change(function(){

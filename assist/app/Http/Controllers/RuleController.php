@@ -32,7 +32,9 @@ class RuleController extends Controller
             'club_end' => 'required|string',
             'club_duration_step' => 'required|integer',
             'brand_logo' => 'mimes:jpeg,bmp,png',
-            'pupil_ratio' => 'required|integer'
+            'pupil_ratio' => 'required|integer',
+            'pupil_min_age' => 'required|integer',
+            'pupil_max_age' => 'required|integer'
         ]);
 
         $rules = Rule::all()->first();
@@ -42,6 +44,8 @@ class RuleController extends Controller
         $rules->club_end = date('H:i:s', strtotime($request->input('club_end')));
         $rules->club_duration_step = $request->input('club_duration_step');
         $rules->pupil_ratio = $request->input('pupil_ratio');
+        $rules->pupil_min_age = $request->input('pupil_min_age');
+        $rules->pupil_max_age = $request->input('pupil_max_age');
         if($request->hasFile('brand_logo')) {
             $request->file('brand_logo')->store('images', 'public');
             $brand_logo = $request->file('brand_logo')->hashName();

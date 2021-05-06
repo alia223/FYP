@@ -28,9 +28,7 @@ class HomeController extends Controller
     public function index()
     {
         if(Gate::denies('admin') && Gate::denies('clubstaff')) {
-            $booked_pupils = BookedPupil::all()->where('parent_id', Auth::id())
-            ->where('booking_date', date('Y-m-d', strtotime("today")))
-            ->where('checked_in', '!=', NULL);
+            $booked_pupils = BookedPupil::all()->where('parent_id', Auth::id())->where('booking_date', date('Y-m-d', strtotime("today")))->where('checked_in', '!=', NULL);
             $pupils = array();
             foreach($booked_pupils as $booked_pupil) {
                 array_push($pupils, Pupil::find($booked_pupil->pupil_id));

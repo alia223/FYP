@@ -62,6 +62,7 @@ class StaffScheduleController extends Controller
             //Order staff from staff longest duration of availability to shortest. This ensures least number of staff are called in.
             $available_staff_members = StaffAvailability::orderBy('available_for', 'desc')->where('day', $day)->where('available_from', '<=',  $lower_bound)->where('available_until', '>=',  $upper_bound)->get();
             $selected_staff = array();
+            //Loop through all available staff members and if they have not worked their maximum preferred hours, then book them in for the current time that this loop is at
             foreach($available_staff_members as $sm) {
                 $hours_worked_this_week = DB::table('staff_availabilities')->select(DB::raw('SUM(total_duration_worked_this_day) as hours_worked_this_week'))->where('staff_id', $sm->staff_id)->groupBy('staff_id')->first();
                 $duration_staff_member_is_required_for = (strtotime($upper_bound) - strtotime($lower_bound)) / 60;

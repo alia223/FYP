@@ -52,8 +52,8 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12" id="pupil_dietary_requirements">
-                                    <label><span class="font-weight-bold">Dietary Requirements:</span>
+                                <div class="col-md-4" id="pupil_dietary_requirements">
+                                    <label><span class="font-weight-bold">Dietary Requirements:</span><br />
                                         <label for="gluten_free_and_coeliac">                                
                                             <input type="checkbox" id="gluten_free_and_coeliac" name="pupil_dietary_requirements[]" value="Gluten Free and Coeliac"/>Gluten Free and Coeliac 
                                         </label><br />
@@ -67,7 +67,7 @@
                                             <input type="checkbox" id="fish_allergies" name="pupil_dietary_requirements[]" value="Fish Allergies"/>Fish Allergies 
                                         </label><br />
                                         <label for="halaal">                                
-                                            <input type="checkbox" id="halaal" name="pupil_dietary_requirements[]" value="Halaal"/>Halal
+                                            <input type="checkbox" id="halaal" name="pupil_dietary_requirements[]" value="Halaal"/>Halaal
                                         </label><br />
                                         <label for="other_option">                                
                                             <input type="checkbox" id="other_option" name="pupil_dietary_requirements[]" value="Other"/>Other
@@ -107,11 +107,11 @@
 <script type="text/javascript"> 
     $('#pupils').addClass('active');
     $('#pupil_date_of_birth').change(function(){
-        if(calculateAge($('#pupil_date_of_birth').val()) < 11 && calculateAge($('#pupil_date_of_birth').val()) > 1 && new Date($('#pupil_date_of_birth').val()) < Date.now()) {
+        if(calculateAge($('#pupil_date_of_birth').val()) < {{$rules->pupil_max_age}} && calculateAge($('#pupil_date_of_birth').val()) > {{$rules->pupil_min_age}} && new Date($('#pupil_date_of_birth').val()) < Date.now()) {
             $('#pupil_date_of_birth')[0].setCustomValidity("");
         }
         else {
-            $('#pupil_date_of_birth')[0].setCustomValidity("Age of child must be between 1 and 11!");
+            $('#pupil_date_of_birth')[0].setCustomValidity("Age of child must be between {{$rules->pupil_min_age}} and {{$rules->pupil_max_age}}");
         }
     });
     $('#other_option').change(function(){

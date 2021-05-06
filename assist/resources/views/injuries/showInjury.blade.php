@@ -30,7 +30,7 @@
                                 <th class="text-center">Date of Injury</th>
                                 <th class="text-center">Staff ID</th>
                                 <th class="text-center">Pupil ID</th>
-                                <th class="text-center">Comment</th>
+                                <th class="text-center">Description of Injury</th>
                                 @if(Gate::denies('admin'))
                                     <th class="text-center" colspan="2">Action</th>
                                 @endif
@@ -39,13 +39,13 @@
                         <tbody>
                             @foreach($injuries as $injury)
                             <tr>
-                                <td class="text-center">{{ $injury->date }}</td>
+                                <td class="text-center">{{ date('d-m-Y', strtotime($injury->date)) }}</td>
                                 <td class="text-center">{{ $injury->staff_id }}</td>
                                 <td class="text-center">{{ $injury->pupil_id }}</td>
                                 <td class="text-center">{{ $injury->description }}</td>
                                 @if(!Gate::denies('clubstaff'))
                                     <td><a href="{{ action('App\Http\Controllers\PupilInjuryController@edit', $injury->id) }}" class="btn
-                                    btn-warning material-icons" title="Edit Booking">build</a></td>
+                                    btn-warning material-icons" title="Edit Injury">build</a></td>
                                 @endif
                                 @if(Gate::denies('admin'))
                                 <td class="text-center">
@@ -58,7 +58,6 @@
                                 @endif
                             </tr>
                             @endforeach
-                            <input type="hidden" id ="pupil_id" value="<?php foreach($pupil_ids as $p_id) echo $p_id; ?>"/>
                         </tbody>
                     </table>
                 </div>

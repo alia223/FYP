@@ -58,7 +58,7 @@
                                     </label>
                                 </div>
                                 <div class="col-md-12">
-                                    <label for="club_duration_step">Club Duration Step (minutes): 
+                                    <label for="club_duration_step">Club Time Increment (minutes): 
                                         <input type="number" name="club_duration_step" id="club_duration_step" url="club_duration_step" value="<?php echo $rules->club_duration_step; ?>"/>
                                     </label>
                                 </div>
@@ -68,10 +68,20 @@
                             <label>
                                 <span class="font-weight-bold">Other Club Rules</span>
                                 <div class="col-md-12">
-                                    <label for="booking_interval">Staff to Pupil Ratio: 
+                                    <label for="pupil_min_age">Minimum Pupil Age: 
+                                        <input type="number" name="pupil_min_age" url="pupil_min_age" value="<?php echo $rules->pupil_min_age; ?>" style="width: 50px;"/>
+                                    </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="pupil_max_age">Maxmimum Pupil Age: 
+                                        <input type="number" name="pupil_max_age" url="pupil_max_age" value="<?php echo $rules->pupil_max_age; ?>" style="width: 50px;"/>
+                                    </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="pupil_ratio">Staff to Pupil Ratio: 
                                         1
                                         <span>:</span>
-                                        <input type="number" name="pupil_ratio" url="pupil_ratio" value="<?php echo $rules->pupil_ratio; ?>" style="width: 50px;"/>
+                                        <input type="number" name="pupil_ratio" id="pupil_ratio" value="<?php echo $rules->pupil_ratio; ?>" style="width: 50px;"/>
                                     </label>
                                 </div>
                             </label>
@@ -91,7 +101,7 @@
 <script type="text/javascript">
     $('#control_panel').addClass('active');
     function colourScheme() {
-        var element_to_change = ["#navbar", "#navbar", "#card-header", "#control_panel", "#submit", "#reset"];
+        var element_to_change = ["#navbar", "#navbar-brand", "#navbarDropdown", "#card-header", "#control_panel", "#submit", "#reset"];
         for(var i = 0;i < element_to_change.length;i++) {
             $(element_to_change[i]).css({"background-color":$("#brand_colour").val(), "color": $("#text_colour").val()});
         }

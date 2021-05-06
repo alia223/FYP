@@ -99,11 +99,11 @@ class PupilRegisterController extends Controller
         foreach($pupils as $pupil) {
             if($pupil->checked_in == null && $pupil->checked_out == null) {
                 $pupil->checked_in = date('H:i:s');
-                $this->log_activity("Checked a pupil in");
+                $this->log_activity("Checked a pupil into club");
             }
             else if($pupil->checked_in != null && $pupil->checked_out == null) {
                 $pupil->checked_out = date('H:i:s');
-                $this->log_activity("Checked a pupil out");
+                $this->log_activity("Checked a pupil out of club");
             }
             else if($pupil->checked_in != null && $pupil->checked_out != null) {
 

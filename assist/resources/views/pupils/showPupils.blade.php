@@ -29,6 +29,9 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>   
+                                @if(!Gate::denies('admin') || !Gate::denies('clubstaff'))
+                                    <th class="text-center">Parent</th>
+                                @endif
                                 <th class="text-center">First Name</th>
                                 <th class="text-center">Last Name</th>
                                 <th class="text-center">Date of Birth</th>
@@ -39,15 +42,17 @@
                         <tbody>
                         @foreach($pupils as $pupil)
                             <tr>
+                                @if(!Gate::denies('admin') || !Gate::denies('clubstaff'))
+                                    <td class="text-center">{{ $parents->where('id', $pupil->parent_id)->first()->name }} {{ $parents->where('id', $pupil->parent_id)->first()->last_name }}</td>
+                                @endif
                                 <td class="text-center">{{ $pupil->first_name }}</td>
                                 <td class="text-center">{{ $pupil->last_name }}</td>
-                                <td class="text-center">{{ $pupil->date_of_birth }}</td>                              
+                                <td class="text-center">{{ date('d-m-Y', strtotime($pupil->date_of_birth)) }}</td>                              
                                 <td class="text-center">{{ $pupil->food_arrangement }}</td>
                                 <td class="text-center"><a href="{{ action('App\Http\Controllers\PupilDietaryRequirementController@show', $pupil->id) }}" class="btn
                                 btn-warning custom-buttons" title="Dietary Requirements"><i class="material-icons">lunch_dining</i></a></td>
-                                <td><a href="{{ action('App\Http\Controllers\PupilInjuryController@show', $pupil->id) }}" class="btn
-                                btn-warning custom-buttons" title="Injury Record"><i class="material-icons">error</i></a></td>
-                                @if(Gate::denies('clubstaff'))
+
+                                @if(Gate::denies('admin') && Gate::denies('clubstaff'))
                                 <td class="text-center"><a href="{{ action('App\Http\Controllers\PupilController@edit', $pupil->id) }}" class="btn
                                 btn-warning custom-buttons" title="Edit Details"><i class="material-icons">build</i></a></td>
                                 <td>
@@ -66,7 +71,7 @@
                 </div>
             </div>
             @if(Gate::denies('clubstaff'))
-                <a class="btn btn-primary" href="{{action('App\Http\Controllers\PupilController@create')}}">Add Child</a>
+                <a class="btn btn-primary" href="{{action('App\Http\Controllers\PupilController@create')}}" style="margin-top:10px;">Add Child</a>
             @endif
         </div>
     </div>

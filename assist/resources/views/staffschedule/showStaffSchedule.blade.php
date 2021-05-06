@@ -40,7 +40,7 @@
                         <?php $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']; ?>
                         <tbody class="text-center">
                         <tr>
-                                <td>{{ $dotw[$day-1] }}<br />{{ $days[$day-1] }}</td>
+                                <td>{{ $days[$day-1] }}<br />{{ date('d-m-Y', strtotime($dotw[$day-1])) }}</td>
                                 <td>
                                 <?php
                                 //at each possible time that a pupil can leave, check and store how many pupils are still in the club and at what time 

@@ -29,9 +29,9 @@ class PupilInjuryController extends Controller
      */
     public function index()
     {
-        $injuries = DB::table('injuries')->join('pupils', 'injuries.pupil_id','=','pupils.id')->select('injuries.*')->where('pupils.parent_id', Auth::id())->get();
+        $injuries = DB::table('injuries')->join('pupils', 'injuries.pupil_id','=','pupils.id')->select('injuries.*')->where('pupils.parent_id', Auth::id())->where('injuries.deleted_at', '=', null)->get();
         $pupils = DB::table('pupils')->join('injuries','pupils.id','=','injuries.pupil_id')->select('pupils.*');
-        $staff = DB::table('users')->join('injuries','users.id','=','injuries.pupil_id')->select('users.*');
+        $staff = DB::table('users')->join('injuries','users.id','=','injuries.staff_id')->select('users.*');
         return view('injuries.injuries', compact('injuries', 'pupils', 'staff'));
     }
 
@@ -40,9 +40,10 @@ class PupilInjuryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        $pupils = Pupil::all();
+        $pupils = Pupil::all()->where('id', $request->input('pupil_id'))->first();
+        error_log($pupils);
         return view('injuries.createInjury', compact('pupils'));
     }
 
@@ -79,12 +80,11 @@ class PupilInjuryController extends Controller
      */
     public function show($id)
     {
-        $pupil_ids = [$id];
         $injuries = Injury::all()->where('pupil_id', $id);
         if(!Gate::denies('clubstaff')) {
             $injuries = Injury::withTrashed()->where('pupil_id', $id)->get();
         }
-        return view('injuries.showInjury', compact('injuries','pupil_ids'));
+        return view('injuries.showInjury', compact('injuries'));
     }
 
     /**
@@ -94,9 +94,11 @@ class PupilInjuryController extends Controller
      */
     public function edit($id)
     {
-        $pupil_id = [$id];
         $injury = Injury::find($id);
-        return view('injuries.editInjury', compact('injury', 'pupil_id'));
+        if(!Gate::denies('clubstaff')) {
+            $injury = Injury::withTrashed()->where('id', $id)->first();
+        }
+        return view('injuries.editInjury', compact('injury'));
     }
 
     /**
@@ -107,21 +109,17 @@ class PupilInjuryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $injury = Injury::find($id);
         // form validation
         $pupil = $this->validate(request(), [
-            'pupil_id' => 'required|string',
             'date_of_injury' => 'required|date',
             'description_of_injury' => 'required|string'
         ]);
+        $injury = Injury::find($id);
         $injury->staff_id = Auth::id();
-        $injury->pupil_id = $injury->pupil_id;
-        $injury->date = $injury->date;
         $injury->description = $request->input('description_of_injury');
         $injury->save();
-        $pupils = Pupil::all();
         $this->log_activity("Edited an injury");
-        return redirect('pupils')->withSuccess("Descrition of injury has been udpated successfully!");
+        return redirect('injuries/'.$injury->pupil_id)->withSuccess('Description of injury updated successfully!');
     }
 
     /**
@@ -131,14 +129,8 @@ class PupilInjuryController extends Controller
      */
     public function destroy($id)
     {
-        $injury = Injury::find($id);
-        if(Gate::denies('clubstaff')) {
-            $injury->delete();
-        }
-        else {
-            $injury = Injury::where('id', $id)->forceDelete();
-        }
-        $this->log_activity(Auth::id(), "Removed an injury");
+        Injury::where('id', $id)->forceDelete();
+        $this->log_activity("Removed an injury");
         return back()->withSuccess('Injury Removed.');
     }
 

@@ -2,6 +2,11 @@
 
 @section('content')
 <div class="container" style="margin-top: 80xp;">
+    <div class="container" >
+        <div class="row justify-content-center">
+            <img src="http://127.0.0.1/assist/storage/app/public/images/screenshot (446).png" height="200px" width="200px"/>
+        </div>
+    </div>
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">

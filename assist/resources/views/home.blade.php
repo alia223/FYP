@@ -22,13 +22,24 @@
         </div>
         @if(Gate::denies('admin') && Gate::denies('clubstaff'))
                 @foreach($pupils as $pupil)
-                <div class="card" style="margin-top: 10px;">
-                <div style="background-colour: lightgreen;" class="card-header">{{ __('Notification') }}</div>
-                  <div class="card-body">
-                    <p style="color: lightgreen;">{{ $pupil->first_name }} {{ $pupil->last_name }} has arrived at the club at 
-                    {{ $booked_pupils->where('pupil_id', $pupil->id)->first()->checked_in }}!</p>
+                @if($booked_pupils->where('pupil_id', $pupil->id)->first()->checked_in)
+                  <div class="card" style="margin-top: 10px;">
+                    <div style="background-colour: lightgreen;" class="card-header">{{ __('Attendance Notification') }}</div>
+                    <div class="card-body">
+                      <p style="color: lightgreen;">{{ $pupil->first_name }} {{ $pupil->last_name }} has arrived at the club at 
+                      {{ $booked_pupils->where('pupil_id', $pupil->id)->first()->checked_in }}!</p>
+                    </div>
                   </div>
-                </div>
+                @endif
+                @if($booked_pupils->where('pupil_id', $pupil->id)->first()->checked_out)
+                  <div class="card" style="margin-top: 10px;">
+                    <div style="background-colour: lightgreen;" class="card-header">{{ __('Attendance Notification') }}</div>
+                    <div class="card-body">
+                      <p style="color: red;">{{ $pupil->first_name }} {{ $pupil->last_name }} has just left the club at 
+                      {{ $booked_pupils->where('pupil_id', $pupil->id)->first()->checked_out }}!</p>
+                    </div>
+                  </div>
+                @endif
                 @endforeach
         @endif
       </div>

@@ -14,7 +14,7 @@
     @include('sidebar')
     <div class="offset-md-1 col-md-9" style="margin-top:50px;">
         <div class="card">
-          <div class="card-header">{{ __('Injury Record') }}</div>
+          <div class="card-header">{{ __('Add Injury') }}</div>
           <!-- display the errors -->
           @if ($errors->any())
           <div class="alert alert-danger">
