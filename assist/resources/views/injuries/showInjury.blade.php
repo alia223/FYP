@@ -31,7 +31,7 @@
                                 <th class="text-center">Staff ID</th>
                                 <th class="text-center">Pupil ID</th>
                                 <th class="text-center">Description of Injury</th>
-                                @if(Gate::denies('admin'))
+                                @if(!Gate::denies('clubstaff'))
                                     <th class="text-center" colspan="2">Action</th>
                                 @endif
                             </tr>
@@ -47,7 +47,7 @@
                                     <td><a href="{{ action('App\Http\Controllers\PupilInjuryController@edit', $injury->id) }}" class="btn
                                     btn-warning material-icons" title="Edit Injury">build</a></td>
                                 @endif
-                                @if(Gate::denies('admin'))
+                                @if(!Gate::denies('clubstaff'))
                                 <td class="text-center">
                                     <form action="{{ action('App\Http\Controllers\PupilInjuryController@destroy', $injury->id) }}"
                                     method="post"> @csrf
@@ -58,6 +58,7 @@
                                 @endif
                             </tr>
                             @endforeach
+                            <input type="hidden" id="pupil_id" name="pupil_id" value="{{ $id }}" />
                         </tbody>
                     </table>
                 </div>
@@ -72,7 +73,7 @@
     $('#injuries').addClass('active');
     $('#registered_club_pupils').addClass('active');
     $('#admin_bookings').addClass('active');
-    document.cookie = "pupil_id= " + document.getElementById('pupil_id').value;
+    document.cookie = "pupil_id= " + $('#pupil_id').val();
 </script>
 @endsection
 </body>

@@ -84,7 +84,7 @@ class PupilInjuryController extends Controller
         if(!Gate::denies('clubstaff')) {
             $injuries = Injury::withTrashed()->where('pupil_id', $id)->get();
         }
-        return view('injuries.showInjury', compact('injuries'));
+        return view('injuries.showInjury', compact('injuries', 'id'));
     }
 
     /**

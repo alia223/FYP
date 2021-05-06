@@ -51,7 +51,8 @@
                                 <td class="text-center">{{ $pupil->food_arrangement }}</td>
                                 <td class="text-center"><a href="{{ action('App\Http\Controllers\PupilDietaryRequirementController@show', $pupil->id) }}" class="btn
                                 btn-warning custom-buttons" title="Dietary Requirements"><i class="material-icons">lunch_dining</i></a></td>
-
+                                <td class="text-center"><a href="{{ action('App\Http\Controllers\PupilInjuryController@show', $pupil->id) }}" class="btn
+                                btn-warning custom-buttons" title="Injuries"><i class="material-icons">error</i></a></td>
                                 @if(Gate::denies('admin') && Gate::denies('clubstaff'))
                                 <td class="text-center"><a href="{{ action('App\Http\Controllers\PupilController@edit', $pupil->id) }}" class="btn
                                 btn-warning custom-buttons" title="Edit Details"><i class="material-icons">build</i></a></td>

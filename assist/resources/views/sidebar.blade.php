@@ -10,6 +10,7 @@
 			@elseif (Gate::denies('admin') && Gate::denies('clubstaff'))
 				<a id="clubstaff_bookings" href="{{ url('bookings') }}?ym=<?php echo date('Y-m');?>">Bookings</a>
 				<a id="pupils" href="{{ url('pupils') }}">Children</a>
+				<a id="injuries" href="{{ url('injuries') }}">Injuries</a>
 			@elseif (Gate::denies('admin') && !Gate::denies('clubstaff')) 
 				<a id="parent_bookings" href="{{ url('bookings') }}">Bookings</a>
 				<a id="register" href="{{ url('pupil-register') }}">Club Attendance Register</a>
